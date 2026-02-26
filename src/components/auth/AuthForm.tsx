@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +10,15 @@ import { useRouter } from "next/navigation";
 
 type Mode = "login" | "register";
 
+const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!;
+
 export function AuthForm() {
   const router = useRouter();
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | undefined>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,9 +35,12 @@ export function AuthForm() {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: { captchaToken },
       });
 
       if (error) {
+        turnstileRef.current?.reset();
+        setCaptchaToken(undefined);
         setError(
           error.message === "Invalid login credentials"
             ? "E-mail ou senha incorretos."
@@ -55,12 +63,15 @@ export function AuthForm() {
         email,
         password,
         options: {
+          captchaToken,
           data: { full_name: fullName.trim() },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
       });
 
       if (error) {
+        turnstileRef.current?.reset();
+        setCaptchaToken(undefined);
         setError(
           error.message === "User already registered"
             ? "Este e-mail já está cadastrado. Faça login."
@@ -78,6 +89,8 @@ export function AuthForm() {
   const toggleMode = () => {
     setMode((m) => (m === "login" ? "register" : "login"));
     setError(null);
+    turnstileRef.current?.reset();
+    setCaptchaToken(undefined);
   };
 
   return (
@@ -125,11 +138,23 @@ export function AuthForm() {
           />
         </div>
 
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={SITE_KEY}
+          onSuccess={(token) => setCaptchaToken(token)}
+          onExpire={() => setCaptchaToken(undefined)}
+          options={{ theme: "auto", language: "pt-BR" }}
+        />
+
         {error && (
           <p className="text-sm text-destructive">{error}</p>
         )}
 
-        <Button type="submit" className="w-full h-11" disabled={loading}>
+        <Button
+          type="submit"
+          className="w-full h-11"
+          disabled={loading || !captchaToken}
+        >
           {loading
             ? "Aguarde..."
             : mode === "login"
@@ -165,14 +190,6 @@ export function AuthForm() {
       </div>
 
       {/* Google OAuth — oculto enquanto está em análise pelo Google
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">ou</span>
-        </div>
-      </div>
       <Button
         className="w-full h-11 text-sm font-medium gap-3"
         variant="outline"
