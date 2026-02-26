@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import { createClient } from "@/lib/supabase/client";
+import { verifyCaptcha } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,13 +31,29 @@ export function AuthForm() {
     setLoading(true);
     setError(null);
 
+    // Verificar captcha via server action (pula em dev)
+    if (!IS_DEV) {
+      if (!captchaToken) {
+        setError("Complete o captcha antes de continuar.");
+        setLoading(false);
+        return;
+      }
+      const valid = await verifyCaptcha(captchaToken);
+      if (!valid) {
+        turnstileRef.current?.reset();
+        setCaptchaToken(undefined);
+        setError("Verificação de captcha falhou. Tente novamente.");
+        setLoading(false);
+        return;
+      }
+    }
+
     const supabase = createClient();
 
     if (mode === "login") {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: { captchaToken: IS_DEV ? undefined : captchaToken },
       });
 
       if (error) {
@@ -45,7 +62,7 @@ export function AuthForm() {
         setError(
           error.message === "Invalid login credentials"
             ? "E-mail ou senha incorretos."
-            : error.message
+            : error.message,
         );
         setLoading(false);
         return;
@@ -64,7 +81,6 @@ export function AuthForm() {
         email,
         password,
         options: {
-          captchaToken: IS_DEV ? undefined : captchaToken,
           data: { full_name: fullName.trim() },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -76,7 +92,7 @@ export function AuthForm() {
         setError(
           error.message === "User already registered"
             ? "Este e-mail já está cadastrado. Faça login."
-            : error.message
+            : error.message,
         );
         setLoading(false);
         return;
@@ -130,7 +146,9 @@ export function AuthForm() {
           <Input
             id="password"
             type="password"
-            placeholder={mode === "register" ? "Mínimo 6 caracteres" : "••••••••"}
+            placeholder={
+              mode === "register" ? "Mínimo 6 caracteres" : "••••••••"
+            }
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -149,20 +167,14 @@ export function AuthForm() {
           />
         )}
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         <Button
           type="submit"
           className="w-full h-11"
           disabled={loading || (!IS_DEV && !captchaToken)}
         >
-          {loading
-            ? "Aguarde..."
-            : mode === "login"
-            ? "Entrar"
-            : "Criar conta"}
+          {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}
         </Button>
       </form>
 
