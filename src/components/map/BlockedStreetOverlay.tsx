@@ -24,7 +24,11 @@ function StreetPopup({ name, neighborhood, city, description }: {
   );
 }
 
-export function BlockedStreetOverlay() {
+interface BlockedStreetOverlayProps {
+  show?: boolean;
+}
+
+export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps) {
   const banIcon = useMemo(
     () =>
       divIcon({
@@ -45,34 +49,52 @@ export function BlockedStreetOverlay() {
     [],
   );
 
-  if (BLOCKED_STREETS.length === 0) return null;
+  if (!show || BLOCKED_STREETS.length === 0) return null;
 
   return (
     <>
       {BLOCKED_STREETS.map((s, i) =>
         s.paths && s.paths.length > 0 ? (
-          // ── Rua com geometria OSM: renderiza a via em vermelho ──
           <Fragment key={i}>
             {s.paths.map((segment: [number, number][], j: number) => (
-              <Polyline
-                key={j}
-                positions={segment}
-                pathOptions={{ color: "#ef4444", weight: 5, opacity: 0.85 }}
-              >
-                <Tooltip sticky>{s.name}</Tooltip>
-                <Popup>
-                  <StreetPopup
-                    name={s.name}
-                    neighborhood={s.neighborhood}
-                    city={s.city}
-                    description={s.description}
-                  />
-                </Popup>
-              </Polyline>
+              <Fragment key={j}>
+                {/* Borda escura embaixo para contraste */}
+                <Polyline
+                  positions={segment}
+                  pathOptions={{
+                    color: "#7f1d1d",
+                    weight: 11,
+                    opacity: 0.5,
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                />
+                {/* Linha principal tracejada */}
+                <Polyline
+                  positions={segment}
+                  pathOptions={{
+                    color: "#ef4444",
+                    weight: 7,
+                    opacity: 0.95,
+                    dashArray: "14, 8",
+                    lineCap: "round",
+                    lineJoin: "round",
+                  }}
+                >
+                  <Tooltip sticky>{s.name}</Tooltip>
+                  <Popup>
+                    <StreetPopup
+                      name={s.name}
+                      neighborhood={s.neighborhood}
+                      city={s.city}
+                      description={s.description}
+                    />
+                  </Popup>
+                </Polyline>
+              </Fragment>
             ))}
           </Fragment>
         ) : (
-          // ── Fallback: pin vermelho quando não há geometria OSM ──
           <Marker key={i} position={[s.lat, s.lng]} icon={banIcon}>
             <Popup>
               <StreetPopup

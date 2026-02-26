@@ -46,7 +46,8 @@ export function UserMenu() {
         className="shadow-md"
         onClick={handleLogout}
       >
-        <LogOut className="h-4 w-4" />
+        <LogOut className="h-4 w-4 mr-1.5" />
+        Sair
       </Button>
     </div>
   );
