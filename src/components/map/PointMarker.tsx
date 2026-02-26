@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Marker } from "react-leaflet";
 import L from "leaflet";
 import { PointPopup } from "./PointPopup";
@@ -46,7 +46,10 @@ interface PointMarkerProps {
 }
 
 export function PointMarker({ point, onOpenDetails }: PointMarkerProps) {
-  const icon = createIcon(point.type, POINT_TYPE_COLORS[point.type]);
+  const icon = useMemo(
+    () => createIcon(point.type, POINT_TYPE_COLORS[point.type]),
+    [point.type],
+  );
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
