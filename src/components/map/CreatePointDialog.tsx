@@ -4,11 +4,11 @@ import { useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,21 +135,18 @@ export function CreatePointDialog({
   };
 
   return (
-    <Sheet
+    <Drawer
       open={open}
       onOpenChange={(value) => {
         if (!value) resetAll();
         onOpenChange(value);
       }}
     >
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-        {/* Drag handle */}
-        <div className="flex justify-center pt-2 pb-1">
-          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-        </div>
-        <SheetHeader>
-          <SheetTitle>Cadastrar Ponto</SheetTitle>
-        </SheetHeader>
+      <DrawerContent>
+        <div className="overflow-y-auto flex-1">
+          <DrawerHeader>
+            <DrawerTitle>Cadastrar Ponto</DrawerTitle>
+          </DrawerHeader>
 
         <form
           onSubmit={(e) => {
@@ -157,7 +154,7 @@ export function CreatePointDialog({
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4 px-4 pb-4"
+          className="space-y-4 px-4 pb-8"
         >
           <form.Field
             name="name"
@@ -414,7 +411,8 @@ export function CreatePointDialog({
             {createPointMutation.isPending ? "Salvando..." : "Criar Ponto"}
           </Button>
         </form>
-      </SheetContent>
-    </Sheet>
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

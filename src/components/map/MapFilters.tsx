@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 import { House, Package, Truck, MountainSnow, TriangleAlert } from "lucide-react";
 import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
@@ -206,29 +206,27 @@ export function MapFilters({
     <>
       {/* Mobile: Controlled sheet (triggered from bottom bar) */}
       <div className="md:hidden">
-        <Sheet open={open} onOpenChange={onOpenChange}>
-          <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-            {/* Drag handle */}
-            <div className="flex justify-center pt-2 pb-1">
-              <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-            </div>
-            <SheetHeader>
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/logo.png"
-                  alt="Ajude Minha Cidade"
-                  width={300}
-                  height={130}
-                  className="h-24 w-auto"
-                />
-                <SheetTitle>Filtros</SheetTitle>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <DrawerContent>
+            <div className="overflow-y-auto flex-1">
+              <DrawerHeader>
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/logo.png"
+                    alt="Ajude Minha Cidade"
+                    width={300}
+                    height={130}
+                    className="h-24 w-auto"
+                  />
+                  <DrawerTitle>Filtros</DrawerTitle>
+                </div>
+              </DrawerHeader>
+              <div className="px-4 pb-8">
+                <FilterContent {...props} />
               </div>
-            </SheetHeader>
-            <div className="px-4 pb-4">
-              <FilterContent {...props} />
             </div>
-          </SheetContent>
-        </Sheet>
+          </DrawerContent>
+        </Drawer>
       </div>
 
       {/* Desktop: Sidebar */}
