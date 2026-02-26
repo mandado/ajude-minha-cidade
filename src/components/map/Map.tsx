@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import { PointMarker } from "./PointMarker";
@@ -65,6 +65,7 @@ export default function Map() {
     toggleCity,
   } = useMapPoints();
 
+  const [isMobile, setIsMobile] = useState(false);
   const [selectedPoint, setSelectedPoint] = useState<MapPoint | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -76,6 +77,13 @@ export default function Map() {
     lng: BRAZIL_CENTER.lng,
   });
   const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const handleViewChange = useCallback(
     (lat: number, lng: number, zoom: number) => {
@@ -127,6 +135,7 @@ export default function Map() {
           <PointMarker
             key={point.id}
             point={point}
+            isMobile={isMobile}
             onOpenDetails={handleOpenDetails}
           />
         ))}
