@@ -201,7 +201,7 @@ export default function Map() {
               onClick={() => setCreateOpen(true)}
             >
               <MapPin className="size-4 text-primary shrink-0" />
-              Novo ponto de ajuda
+              Novo ponto no mapa
             </button>
             <button
               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors text-left"
@@ -367,7 +367,7 @@ export default function Map() {
                 <MapPin className="size-6 text-primary" />
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-base">Ponto de ajuda</p>
+                <p className="font-semibold text-base">Novo ponto no mapa</p>
                 <p className="text-sm text-muted-foreground">Abrigo, coleta, distribuição ou risco</p>
               </div>
               <ChevronRight className="size-5 text-muted-foreground shrink-0" />
