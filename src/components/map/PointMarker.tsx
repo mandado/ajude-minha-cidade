@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Marker } from "react-leaflet";
 import L from "leaflet";
 import { PointPopup } from "./PointPopup";
@@ -19,9 +19,6 @@ const POINT_TYPE_ICON_PATHS: Record<PointType, string> = {
 
 function createIcon(type: PointType, color: string) {
   const iconPaths = POINT_TYPE_ICON_PATHS[type];
-  // The pin is viewBox 0 0 24 36.
-  // White circle at (12,11) r=6 → spans (6,5)→(18,17).
-  // translate(6,5) scale(0.5) maps the 24×24 lucide icon into that 12×12 area.
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="28" height="42">
       <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="${color}" stroke="#fff" stroke-width="1.5"/>
@@ -42,22 +39,19 @@ function createIcon(type: PointType, color: string) {
 
 interface PointMarkerProps {
   point: MapPoint;
+  isMobile: boolean;
   onOpenDetails?: (point: MapPoint) => void;
 }
 
-export function PointMarker({ point, onOpenDetails }: PointMarkerProps) {
+export const PointMarker = memo(function PointMarker({
+  point,
+  isMobile,
+  onOpenDetails,
+}: PointMarkerProps) {
   const icon = useMemo(
     () => createIcon(point.type, POINT_TYPE_COLORS[point.type]),
     [point.type],
   );
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   if (!point.latitude || !point.longitude) return null;
 
@@ -72,4 +66,4 @@ export function PointMarker({ point, onOpenDetails }: PointMarkerProps) {
       {!isMobile && <PointPopup point={point} onOpenDetails={onOpenDetails} />}
     </Marker>
   );
-}
+});
