@@ -10,7 +10,6 @@ import { CreatePointDialog } from "./CreatePointDialog";
 import { PointDetailsSheet } from "./PointDetailsSheet";
 import { WeatherAlertBanner } from "./WeatherAlertBanner";
 import { WeatherWidget } from "./WeatherWidget";
-import { UserMenu } from "@/components/auth/UserMenu";
 import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
 import { HelpDialog } from "./HelpDialog";
@@ -154,54 +153,83 @@ export default function Map() {
         ))}
       </MapContainer>
 
-      {/* Top-left: Auth + Actions — desktop only */}
-      <div className="hidden md:flex absolute top-4 left-4 z-[1000] items-center gap-2">
-        <UserMenu />
-        <div className="flex items-center gap-1.5 bg-background/95 backdrop-blur-sm border rounded-lg shadow-md p-1.5">
-          {user ? (
-            <>
-              <Button
-                size="sm"
-                className="h-8 px-3 text-sm font-semibold"
-                onClick={() => setCreateOpen(true)}
-              >
-                <MapPin className="h-4 w-4 mr-1.5" />
-                Novo ponto de ajuda
-              </Button>
-              <div className="w-px h-5 bg-border" />
-              <Button
-                size="sm"
-                variant="ghost"
-                className="h-8 px-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
-                onClick={() => setAddBlockedStreetOpen(true)}
-              >
-                <Construction className="h-4 w-4 mr-1.5" />
-                Reportar rua fechada
-              </Button>
-            </>
-          ) : (
-            <span className="text-xs text-muted-foreground px-2">
-              Entre para contribuir
-            </span>
-          )}
+      {/* Painel lateral esquerdo — desktop only */}
+      <div className="hidden md:flex absolute top-4 left-4 z-[1000] flex-col w-56 bg-background/95 backdrop-blur-sm border rounded-xl shadow-lg overflow-hidden">
+        {/* Logo / branding */}
+        <div className="px-4 py-3 border-b">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Ajuda Minha Cidade" className="w-full h-auto" />
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 shadow-md bg-background"
-          onClick={() => setHelpOpen(true)}
-        >
-          <HelpCircle className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="icon"
-          className="h-9 w-9 shadow-md bg-background"
-          title="Enviar feedback"
-          onClick={() => setFeedbackOpen(true)}
-        >
-          <MessageSquareDot className="h-4 w-4" />
-        </Button>
+        {/* Usuário */}
+        {user ? (
+          <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="size-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <User className="size-4 text-primary" />
+              </div>
+              <span className="text-sm font-medium truncate">
+                {user.user_metadata?.full_name || user.email?.split("@")[0] || "Usuário"}
+              </span>
+            </div>
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 shrink-0"
+              onClick={async () => {
+                const supabase = (await import("@/lib/supabase/client")).createClient();
+                await supabase.auth.signOut();
+                router.refresh();
+              }}
+            >
+              <LogOut className="size-3.5" />
+              Sair
+            </button>
+          </div>
+        ) : (
+          <button
+            className="flex items-center gap-2 px-3 py-2.5 border-b hover:bg-accent transition-colors text-sm font-medium"
+            onClick={() => router.push("/login")}
+          >
+            <User className="size-4 text-muted-foreground" />
+            Entrar na conta
+          </button>
+        )}
+
+        {/* Ações de contribuição */}
+        {user && (
+          <div className="py-1 border-b">
+            <button
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+              onClick={() => setCreateOpen(true)}
+            >
+              <MapPin className="size-4 text-primary shrink-0" />
+              Novo ponto de ajuda
+            </button>
+            <button
+              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors text-left"
+              onClick={() => setAddBlockedStreetOpen(true)}
+            >
+              <Construction className="size-4 shrink-0" />
+              Reportar rua fechada
+            </button>
+          </div>
+        )}
+
+        {/* Suporte */}
+        <div className="py-1">
+          <button
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
+            onClick={() => setHelpOpen(true)}
+          >
+            <HelpCircle className="size-4 shrink-0" />
+            Como usar
+          </button>
+          <button
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
+            onClick={() => setFeedbackOpen(true)}
+          >
+            <MessageSquareDot className="size-4 shrink-0" />
+            Enviar feedback
+          </button>
+        </div>
       </div>
 
       {/* Loading indicator */}

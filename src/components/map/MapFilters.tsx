@@ -85,32 +85,34 @@ export function FilterContent({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h4 className="text-sm font-medium mb-3">Tipo de ponto</h4>
-        <div className="flex flex-wrap gap-2">
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tipo de ponto</h4>
+        <div className="flex flex-col gap-1">
           {(Object.entries(POINT_TYPE_LABELS) as [PointType, string][]).map(
             ([type, label]) => {
               const TypeIcon = TYPE_ICON_MAP[type];
+              const active = filters.types.includes(type);
+              const color = POINT_TYPE_COLORS[type];
               return (
                 <button
                   key={type}
                   onClick={() => toggleType(type)}
-                  className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
-                  style={{
-                    backgroundColor: filters.types.includes(type)
-                      ? `${POINT_TYPE_COLORS[type]}20`
-                      : "transparent",
-                    borderColor: filters.types.includes(type)
-                      ? POINT_TYPE_COLORS[type]
-                      : "var(--border)",
-                    color: filters.types.includes(type)
-                      ? POINT_TYPE_COLORS[type]
-                      : "inherit",
-                  }}
+                  className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors text-left"
                 >
-                  <TypeIcon className="size-3.5 shrink-0" />
-                  {label}
+                  <span className="flex items-center gap-2">
+                    <TypeIcon
+                      className="size-4 shrink-0"
+                      style={{ color: active ? color : undefined }}
+                    />
+                    {label}
+                  </span>
+                  <span
+                    className="relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors"
+                    style={{ backgroundColor: active ? color : "var(--muted)" }}
+                  >
+                    <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${active ? "translate-x-4" : "translate-x-0"}`} />
+                  </span>
                 </button>
               );
             },
@@ -120,16 +122,16 @@ export function FilterContent({
 
       {cityCounts.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium mb-3">Cidade</h4>
-          <div className="h-48 overflow-y-auto">
-            <div className="flex flex-wrap gap-2 pr-3">
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cidade</h4>
+          <div className="h-36 overflow-y-auto">
+            <div className="flex flex-wrap gap-1.5 pr-1">
               {cityCounts.map((item) => {
                 const isActive = cityFilter.includes(item.city);
                 return (
                   <button
                     key={`${item.city}|${item.state}`}
                     onClick={() => handleCityClick(item)}
-                    className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm transition-colors ${
                       isActive
                         ? "bg-primary text-primary-foreground border-primary"
                         : "hover:bg-accent"
@@ -151,28 +153,27 @@ export function FilterContent({
         </div>
       )}
 
-      <div>
-        <h4 className="text-sm font-medium mb-3">Mostrar no mapa</h4>
+      <div className="pt-2 border-t space-y-2">
         <button
           onClick={onToggleBlockedStreets}
-          className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
-            showBlockedStreets
-              ? "bg-red-50 border-red-400 text-red-600"
-              : "hover:bg-accent"
-          }`}
+          className="w-full flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors"
         >
-          <Construction className="size-3.5 shrink-0" />
-          {showBlockedStreets ? "Ocultar ruas bloqueadas" : "Mostrar ruas bloqueadas"}
+          <span className="flex items-center gap-2">
+            <Construction className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`} />
+            Ruas fechadas
+          </span>
+          <span className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}>
+            <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`} />
+          </span>
         </button>
-      </div>
-
-      <div className="flex items-center justify-between pt-2 border-t">
-        <span className="text-sm text-muted-foreground">
-          {filteredCount} de {totalCount} pontos
-        </span>
-        <Button variant="outline" size="sm" onClick={resetFilters}>
-          Limpar filtros
-        </Button>
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {filteredCount} de {totalCount} pontos
+          </span>
+          <Button variant="outline" size="sm" onClick={resetFilters}>
+            Limpar filtros
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -211,8 +212,8 @@ export function MapFilters({
       </div>
 
       {/* Desktop: Sidebar */}
-      <div className="hidden md:block absolute top-4 right-4 z-[1000] w-[280px] bg-background/95 backdrop-blur-sm rounded-lg border shadow-lg p-4">
-        <h3 className="font-semibold mb-4">Filtros</h3>
+      <div className="hidden md:block absolute top-4 right-4 z-[1000] w-[272px] bg-background/95 backdrop-blur-sm rounded-xl border shadow-lg p-4">
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">Filtros</h3>
         <FilterContent {...props} />
       </div>
     </>
