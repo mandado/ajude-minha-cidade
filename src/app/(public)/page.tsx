@@ -20,7 +20,7 @@ export default function HomePage() {
       </div>
 
       {/* Rodapé visível — satisfaz requisitos do Google OAuth (nome, finalidade, política de privacidade) */}
-      <footer className="w-full bg-background/95 border-t px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground z-[1001]">
+      <footer className="hidden md:flex w-full bg-background/95 border-t px-4 py-2 flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground z-[1001]">
         <div className="flex items-center gap-1">
           <h1 className="font-semibold text-foreground text-xs">Ajude Minha Cidade</h1>
           <span>— Mapa colaborativo de apoio humanitário em situações de emergência</span>
