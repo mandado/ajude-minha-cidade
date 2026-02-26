@@ -59,19 +59,17 @@ export function PointMarker({ point, onOpenDetails }: PointMarkerProps) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
+  if (!point.latitude || !point.longitude) return null;
+
   return (
     <Marker
       position={[point.latitude, point.longitude]}
       icon={icon}
       eventHandlers={
-        isMobile
-          ? { click: () => onOpenDetails?.(point) }
-          : undefined
+        isMobile ? { click: () => onOpenDetails?.(point) } : undefined
       }
     >
-      {!isMobile && (
-        <PointPopup point={point} onOpenDetails={onOpenDetails} />
-      )}
+      {!isMobile && <PointPopup point={point} onOpenDetails={onOpenDetails} />}
     </Marker>
   );
 }
