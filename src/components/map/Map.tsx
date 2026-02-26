@@ -277,7 +277,7 @@ export default function Map() {
 
       {/* Footer links — visíveis para crawlers e Google OAuth verification */}
       <div className="hidden md:flex absolute bottom-2 left-1/2 -translate-x-1/2 z-[999] items-center gap-3 text-[11px] text-muted-foreground/70">
-        <span>Ajuda Minha Cidade — Mapa colaborativo de apoio humanitário</span>
+        <span>Ajude Minha Cidade — Mapa colaborativo de apoio humanitário</span>
         <span>·</span>
         <Link href="/privacidade" className="hover:text-foreground underline transition-colors">
           Política de Privacidade

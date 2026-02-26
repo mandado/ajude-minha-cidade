@@ -4,8 +4,8 @@ import Link from "next/link";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Termos de Uso — Ajuda Minha Cidade",
-  description: "Termos de Uso da plataforma Ajuda Minha Cidade.",
+  title: "Termos de Uso — Ajude Minha Cidade",
+  description: "Termos de Uso da plataforma Ajude Minha Cidade.",
 };
 
 const LAST_UPDATED = "26 de fevereiro de 2025";
@@ -39,7 +39,7 @@ export default function TermosPage() {
 
           <Section title="1. Identificação da Plataforma e dos Operadores">
             <p>
-              <strong>Ajuda Minha Cidade</strong> é uma plataforma digital
+              <strong>Ajude Minha Cidade</strong> é uma plataforma digital
               colaborativa, de caráter voluntário e <strong>sem fins
               lucrativos</strong>, desenvolvida e operada por:
             </p>
@@ -73,7 +73,7 @@ export default function TermosPage() {
 
           <Section title="2. Objeto e Natureza do Serviço">
             <p>
-              O Ajuda Minha Cidade disponibiliza um mapa colaborativo em tempo
+              O Ajude Minha Cidade disponibiliza um mapa colaborativo em tempo
               real que permite que cidadãos:
             </p>
             <ul>
@@ -107,7 +107,7 @@ export default function TermosPage() {
             </div>
             <p>
               <strong>
-                As informações publicadas no Ajuda Minha Cidade são
+                As informações publicadas no Ajude Minha Cidade são
                 inteiramente geradas por usuários voluntários e não são
                 verificadas, validadas ou homologadas pelos Operadores.
               </strong>
@@ -305,7 +305,7 @@ export default function TermosPage() {
 
           <Section title="9. Disponibilidade do Serviço">
             <p>
-              O Ajuda Minha Cidade é fornecido sem garantia de disponibilidade
+              O Ajude Minha Cidade é fornecido sem garantia de disponibilidade
               contínua. Os Operadores podem, a qualquer tempo e sem aviso
               prévio:
             </p>

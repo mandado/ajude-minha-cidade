@@ -4,8 +4,8 @@ import Link from "next/link";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Política de Privacidade — Ajuda Minha Cidade",
-  description: "Política de Privacidade da plataforma Ajuda Minha Cidade.",
+  title: "Política de Privacidade — Ajude Minha Cidade",
+  description: "Política de Privacidade da plataforma Ajude Minha Cidade.",
 };
 
 const LAST_UPDATED = "26 de fevereiro de 2025";
@@ -32,7 +32,7 @@ export default function PrivacidadePage() {
 
           <Section title="1. Identificação dos Responsáveis">
             <p>
-              A plataforma <strong>Ajuda Minha Cidade</strong> é desenvolvida e
+              A plataforma <strong>Ajude Minha Cidade</strong> é desenvolvida e
               operada por <strong>Jorge Roberto Tomaz Junior</strong> e{" "}
               <strong>Thayrone de Souza Nascimento</strong>, pessoas físicas
               residentes no Brasil, doravante denominados conjuntamente como
@@ -66,9 +66,9 @@ export default function PrivacidadePage() {
             </ul>
           </Section>
 
-          <Section title="2. O que é o Ajuda Minha Cidade">
+          <Section title="2. O que é o Ajude Minha Cidade">
             <p>
-              O <strong>Ajuda Minha Cidade</strong> é uma plataforma digital
+              O <strong>Ajude Minha Cidade</strong> é uma plataforma digital
               colaborativa de caráter voluntário e sem fins lucrativos, que
               permite que cidadãos registrem e consultem em tempo real pontos de
               apoio humanitário em situações de emergência e desastre, tais como

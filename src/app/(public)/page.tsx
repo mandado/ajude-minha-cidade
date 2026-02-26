@@ -21,9 +21,9 @@ export default function HomePage() {
         Descreve a finalidade do app e inclui o link para Política de Privacidade.
       */}
       <div className="sr-only">
-        <h1>Ajuda Minha Cidade</h1>
+        <h1>Ajude Minha Cidade</h1>
         <p>
-          Ajuda Minha Cidade é uma plataforma colaborativa e gratuita de apoio
+          Ajude Minha Cidade é uma plataforma colaborativa e gratuita de apoio
           humanitário. Exibe em tempo real pontos de abrigo, coleta e
           distribuição de doações, além de ocorrências de deslizamentos e
           soterramentos. Ajude sua comunidade em situações de emergência.
