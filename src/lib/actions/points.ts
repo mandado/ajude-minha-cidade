@@ -1,7 +1,5 @@
 "use server";
 
-import { Redis } from "@upstash/redis";
-import { Ratelimit } from "@upstash/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import {
   createPointSchema,
@@ -11,20 +9,6 @@ import {
   uuidSchema,
 } from "@/lib/validators/point";
 import type { NeedInput } from "@/lib/validators/point";
-
-const redis = Redis.fromEnv();
-
-const createPointRateLimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(3, "1 d"),
-  prefix: "create-point",
-});
-
-const mutationRateLimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(30, "1 m"),
-  prefix: "point-mutation",
-});
 
 interface CreatePointData {
   point: {
@@ -52,14 +36,6 @@ export async function createPoint(data: CreatePointData) {
   } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Você precisa estar logado para criar um ponto." };
-  }
-
-  // Rate limit: 3 points per day per user
-  const { success: withinLimit } = await createPointRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return {
-      error: "Limite diário atingido. Você pode criar até 3 pontos por dia.",
-    };
   }
 
   // Validate point data
@@ -159,11 +135,6 @@ export async function updatePoint(
     return { error: "Você precisa estar logado." };
   }
 
-  // Rate limit
-  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return { error: "Muitas requisições. Aguarde um momento." };
-  }
 
   // Sanitize: convert null to undefined for Zod validation
   const sanitized = Object.fromEntries(
@@ -227,11 +198,6 @@ export async function addNeed(
     return { error: "Você precisa estar logado." };
   }
 
-  // Rate limit
-  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return { error: "Muitas requisições. Aguarde um momento." };
-  }
 
   const needResult = needSchema.safeParse(need);
   if (!needResult.success) {
@@ -280,11 +246,6 @@ export async function updateNeed(
     return { error: "Você precisa estar logado." };
   }
 
-  // Rate limit
-  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return { error: "Muitas requisições. Aguarde um momento." };
-  }
 
   // Validate with Zod
   const parsed = updateNeedSchema.safeParse(data);
@@ -372,11 +333,6 @@ export async function deleteNeed(needId: string) {
     return { error: "Você precisa estar logado." };
   }
 
-  // Rate limit
-  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return { error: "Muitas requisições. Aguarde um momento." };
-  }
 
   const { error } = await supabase.from("needs").delete().eq("id", needId);
 
@@ -403,11 +359,6 @@ export async function deletePoint(pointId: string) {
     return { error: "Você precisa estar logado." };
   }
 
-  // Rate limit
-  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
-  if (!withinLimit) {
-    return { error: "Muitas requisições. Aguarde um momento." };
-  }
 
   // Delete needs first
   await supabase.from("needs").delete().eq("point_id", pointId);
