@@ -4,7 +4,6 @@ import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Drawer,
   DrawerContent,
@@ -117,7 +116,7 @@ export function FilterContent({
       {cityCounts.length > 0 && (
         <div>
           <h4 className="text-sm font-medium mb-3">Cidade</h4>
-          <ScrollArea className="h-48">
+          <div className="h-48 overflow-y-auto">
             <div className="flex flex-wrap gap-2 pr-3">
               {cityCounts.map((item) => {
                 const isActive = cityFilter.includes(item.city);
@@ -143,7 +142,7 @@ export function FilterContent({
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       )}
 

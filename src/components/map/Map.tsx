@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import { PointMarker } from "./PointMarker";
 import { MapFilters } from "./MapFilters";
@@ -35,12 +35,12 @@ function FlyToHandler({
   const map = useMap();
   mapRef.current = map;
 
-  useMapEvents({
-    moveend: () => {
-      const center = map.getCenter();
-      onViewChange(center.lat, center.lng, map.getZoom());
-    },
-  });
+  const handleMoveEnd = useCallback(() => {
+    const center = map.getCenter();
+    onViewChange(center.lat, center.lng, map.getZoom());
+  }, [map, onViewChange]);
+
+  useMapEvent("moveend", handleMoveEnd);
 
   useEffect(() => {
     const center = map.getCenter();
