@@ -101,10 +101,9 @@ export function FilterContent({
                   className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors text-left"
                 >
                   <span className="flex items-center gap-2">
-                    <TypeIcon
-                      className="size-4 shrink-0"
-                      style={{ color: active ? color : undefined }}
-                    />
+                    <span style={active ? { color } : undefined}>
+                      <TypeIcon className="size-4 shrink-0" />
+                    </span>
                     {label}
                   </span>
                   <span
