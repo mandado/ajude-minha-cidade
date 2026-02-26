@@ -153,9 +153,18 @@ export function FeedbackDialog({ open, onOpenChange }: FeedbackDialogProps) {
                   maxLength={1000}
                   className="resize-none"
                 />
-                <p className="text-xs text-muted-foreground mt-1 text-right">
-                  {message.length}/1000
-                </p>
+                <div className="flex justify-between mt-1">
+                  {message.trim().length > 0 && message.trim().length < 10 ? (
+                    <p className="text-xs text-destructive">
+                      Mínimo de 10 caracteres ({10 - message.trim().length} restantes)
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    {message.length}/1000
+                  </p>
+                </div>
               </div>
 
               <Button

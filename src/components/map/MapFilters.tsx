@@ -10,16 +10,23 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { House, Package, Truck, MountainSnow, TriangleAlert, Construction } from "lucide-react";
-import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
-  POINT_TYPE_LABELS,
-  POINT_TYPE_COLORS,
-} from "@/types/map";
+  House,
+  Package,
+  Truck,
+  MountainSnow,
+  TriangleAlert,
+  Construction,
+} from "lucide-react";
+import type { MapFilters as MapFiltersType } from "@/types/map";
+import { POINT_TYPE_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { PointType } from "@/types/database";
 import { getCities } from "@/lib/actions/points";
 
-const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICON_MAP: Record<
+  PointType,
+  React.ComponentType<{ className?: string }>
+> = {
   shelter: House,
   collection: Package,
   distribution: Truck,
@@ -45,7 +52,6 @@ interface MapFiltersControlledProps extends MapFiltersProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-
 export function FilterContent({
   filters,
   toggleType,
@@ -64,7 +70,11 @@ export function FilterContent({
     staleTime: 60_000,
   });
 
-  const handleCityClick = (item: { city: string; lat: number; lng: number }) => {
+  const handleCityClick = (item: {
+    city: string;
+    lat: number;
+    lng: number;
+  }) => {
     const isRemoving = cityFilter.includes(item.city);
     onCityToggle(item.city);
 
@@ -87,7 +97,9 @@ export function FilterContent({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tipo de ponto</h4>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Tipo de ponto
+        </h4>
         <div className="flex flex-col gap-1">
           {(Object.entries(POINT_TYPE_LABELS) as [PointType, string][]).map(
             ([type, label]) => {
@@ -110,7 +122,9 @@ export function FilterContent({
                     className="relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors"
                     style={{ backgroundColor: active ? color : "var(--muted)" }}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${active ? "translate-x-4" : "translate-x-0"}`} />
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${active ? "translate-x-4" : "translate-x-0"}`}
+                    />
                   </span>
                 </button>
               );
@@ -121,7 +135,9 @@ export function FilterContent({
 
       {cityCounts.length > 0 && (
         <div>
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cidade</h4>
+          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+            Cidade
+          </h4>
           <div className="h-36 overflow-y-auto">
             <div className="flex flex-wrap gap-1.5 pr-1">
               {cityCounts.map((item) => {
@@ -158,11 +174,17 @@ export function FilterContent({
           className="w-full flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors"
         >
           <span className="flex items-center gap-2">
-            <Construction className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`} />
+            <Construction
+              className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`}
+            />
             Ruas fechadas
           </span>
-          <span className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}>
-            <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`} />
+          <span
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`}
+            />
           </span>
         </button>
         <div className="flex items-center justify-between">
@@ -191,13 +213,12 @@ export function MapFilters({
           <DrawerContent>
             <div className="overflow-y-auto flex-1">
               <DrawerHeader>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-3">
                   <Image
                     src="/logo.png"
                     alt="Ajude Minha Cidade"
-                    width={300}
-                    height={130}
-                    className="h-24 w-auto"
+                    width={200}
+                    height={90}
                   />
                   <DrawerTitle>Filtros</DrawerTitle>
                 </div>
@@ -212,7 +233,9 @@ export function MapFilters({
 
       {/* Desktop: Sidebar */}
       <div className="hidden md:block absolute top-4 right-4 z-[1000] w-[272px] bg-background/95 backdrop-blur-sm rounded-xl border shadow-lg p-4">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">Filtros</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          Filtros
+        </h3>
         <FilterContent {...props} />
       </div>
     </>
