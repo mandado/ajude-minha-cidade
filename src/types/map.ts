@@ -1,0 +1,28 @@
+import type { Point, Need, PointType, PriorityLevel } from "./database";
+
+export interface MapPoint extends Point {
+  needs: Need[];
+}
+
+export interface MapFilters {
+  types: PointType[];
+  priorities: PriorityLevel[];
+}
+
+export const POINT_TYPE_LABELS: Record<PointType, string> = {
+  shelter: "Abrigo",
+  collection: "Ponto de Coleta",
+  distribution: "Distribuição",
+};
+
+export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
+  high: "Alta",
+  medium: "Média",
+  low: "Baixa",
+};
+
+export const POINT_TYPE_COLORS: Record<PointType, string> = {
+  shelter: "#3b82f6",       // blue
+  collection: "#22c55e",    // green
+  distribution: "#f97316",  // orange
+};
