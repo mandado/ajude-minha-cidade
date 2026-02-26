@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ajude Minha Cidade
 
-## Getting Started
+Plataforma colaborativa para mapear pontos de ajuda em situações de emergência e desastres naturais no Brasil.
 
-First, run the development server:
+## O que é
+
+O **Ajude Minha Cidade** permite que qualquer pessoa cadastre e encontre abrigos, pontos de coleta e distribuição de doações em um mapa interativo. A ideia é facilitar a organização da ajuda em momentos de crise — enchentes, deslizamentos, secas — conectando quem precisa com quem pode ajudar.
+
+## Como funciona
+
+- **Mapa interativo** com pontos de ajuda geolocalizados (abrigos, coleta, distribuição)
+- **Cadastro de pontos** com endereço, necessidades, telefone e horário de funcionamento
+- **Necessidades por ponto** — cada ponto lista o que precisa (alimentos, cobertores, voluntários, etc.)
+- **Moderação comunitária** — usuários podem confirmar ou reportar pontos
+- **Filtros** por tipo de ponto, prioridade e cidade
+- **Alertas meteorológicos** do INMET integrados ao mapa
+- **Previsão do tempo** por localização
+
+## Tecnologias
+
+- **Next.js 16** (App Router)
+- **React 19** + TypeScript
+- **Supabase** (auth com Google OAuth, banco PostgreSQL com PostGIS)
+- **Leaflet** + react-leaflet (mapa)
+- **TanStack Query** (queries e mutations)
+- **TanStack Form** (formulários)
+- **Tailwind CSS v4** + shadcn/ui
+- **Zod v4** (validação)
+- **Upstash Redis** (rate limiting e cache de geocoding)
+
+## Rodando localmente
+
+### Pré-requisitos
+
+- [Bun](https://bun.sh/) (ou Node.js 20+)
+- Conta no [Supabase](https://supabase.com/)
+- Conta no [Upstash](https://upstash.com/) (Redis)
+- Chave de API do [Mapbox](https://www.mapbox.com/) (geocoding)
+- Google OAuth configurado no Supabase
+
+### Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clonar o repositório
+git clone git@github.com:mandado/ajude-minha-cidade.git
+cd ajude-minha-cidade
+
+# Instalar dependências
+bun install
+
+# Configurar variáveis de ambiente
+cp .env.example .env.local
+# Preencher as variáveis no .env.local
+
+# Rodar as migrations no Supabase
+bun run db:push
+
+# Iniciar o servidor de desenvolvimento
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Variáveis de ambiente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+MAPBOX_ACCESS_TOKEN=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Estrutura do projeto
 
-## Learn More
+```
+src/
+├── app/                    # Rotas (App Router)
+│   ├── (auth)/             # Login (Google OAuth)
+│   ├── (public)/           # Página principal (mapa)
+│   └── api/                # API routes (geocoding, auth callback)
+├── components/
+│   ├── auth/               # AuthForm, UserMenu
+│   ├── map/                # Mapa, filtros, popups, sheets
+│   └── ui/                 # Componentes shadcn
+├── hooks/                  # useAuth, useMapPoints, usePointMutations, useWeather
+├── lib/
+│   ├── actions/            # Server Actions (CRUD pontos, moderação)
+│   ├── api/                # APIs externas (clima)
+│   ├── supabase/           # Clientes Supabase (server/client)
+│   └── validators/         # Schemas Zod
+├── types/                  # TypeScript types
+└── middleware.ts            # Refresh de sessão Supabase
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Licença
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
