@@ -291,7 +291,7 @@ export function CreatePointDialog({
                   onSelect={handleGeoSelect}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Para melhores resultados, pesquise por <strong>rua + número + cidade</strong> (ex: "Rua das Flores 123, Porto Alegre") ou pelo <strong>CEP</strong>. Nomes de bairros e pontos de referência conhecidos também funcionam. Selecione um resultado da lista para confirmar.
+                  Para melhores resultados, pesquise por <strong>rua + número + cidade</strong> (ex: "Rua das Flores 123, Porto Alegre"). Nomes de bairros e pontos de referência conhecidos também funcionam. Selecione um resultado da lista para confirmar.
                 </p>
                 <form.Subscribe selector={(state) => state.values}>
                   {(values) =>
