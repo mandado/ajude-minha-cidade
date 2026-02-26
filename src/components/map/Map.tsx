@@ -57,7 +57,6 @@ export default function Map() {
     points,
     filters,
     toggleType,
-    togglePriority,
     resetFilters,
     totalPoints,
     isLoading,
@@ -172,7 +171,6 @@ export default function Map() {
       <MapFilters
         filters={filters}
         toggleType={toggleType}
-        togglePriority={togglePriority}
         resetFilters={resetFilters}
         filteredCount={points.length}
         totalCount={totalPoints}

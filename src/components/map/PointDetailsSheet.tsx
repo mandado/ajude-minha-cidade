@@ -56,17 +56,11 @@ import {
   useDeleteNeed,
 } from "@/hooks/usePointMutations";
 import type { MapPoint } from "@/types/map";
-import { POINT_TYPE_LABELS, PRIORITY_LABELS, POINT_TYPE_COLORS } from "@/types/map";
-import type { Need, PointType, PriorityLevel } from "@/types/database";
+import { POINT_TYPE_LABELS, POINT_TYPE_COLORS } from "@/types/map";
+import type { Need, PointType } from "@/types/database";
 import { ModerationButtons } from "./ModerationButtons";
 import { useLocationWeather, useINMETAlerts } from "@/hooks/useWeather";
 import { getWeatherInfo } from "@/types/weather";
-
-const priorityVariant: Record<string, "default" | "secondary" | "outline"> = {
-  high: "default",
-  medium: "secondary",
-  low: "outline",
-};
 
 const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   shelter: House,
@@ -121,12 +115,6 @@ export function PointDetailsSheet({
                     <span className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs">
                         {POINT_TYPE_LABELS[point.type]}
-                      </Badge>
-                      <Badge
-                        variant={priorityVariant[point.priority]}
-                        className="text-xs"
-                      >
-                        {PRIORITY_LABELS[point.priority]}
                       </Badge>
                     </span>
                   </DrawerDescription>
@@ -298,7 +286,6 @@ function EditPointInfo({
       name: point.name,
       description: point.description ?? "",
       type: point.type as string,
-      priority: point.priority as string,
       address: point.address ?? "",
       city: point.city ?? "",
       state: point.state ?? "",
@@ -315,7 +302,6 @@ function EditPointInfo({
           name: value.name,
           description: value.description || null,
           type: value.type,
-          priority: value.priority,
           latitude: value.latitude,
           longitude: value.longitude,
           address: value.address || null,
@@ -382,45 +368,25 @@ function EditPointInfo({
         )}
       </form.Field>
 
-      <div className="grid grid-cols-2 gap-4">
-        <form.Field name="type">
-          {(field) => (
-            <div className="space-y-2">
-              <Label>Tipo *</Label>
-              <Select value={field.state.value} onValueChange={field.handleChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="shelter">Abrigo</SelectItem>
-                  <SelectItem value="collection">Ponto de Coleta</SelectItem>
-                  <SelectItem value="distribution">Distribuição</SelectItem>
-                  <SelectItem value="landslide">Deslizamento</SelectItem>
-                  <SelectItem value="burial">Soterramento</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </form.Field>
-
-        <form.Field name="priority">
-          {(field) => (
-            <div className="space-y-2">
-              <Label>Prioridade *</Label>
-              <Select value={field.state.value} onValueChange={field.handleChange}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="high">Alta</SelectItem>
-                  <SelectItem value="medium">Média</SelectItem>
-                  <SelectItem value="low">Baixa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </form.Field>
-      </div>
+      <form.Field name="type">
+        {(field) => (
+          <div className="space-y-2">
+            <Label>Tipo *</Label>
+            <Select value={field.state.value} onValueChange={field.handleChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="shelter">Abrigo</SelectItem>
+                <SelectItem value="collection">Ponto de Coleta</SelectItem>
+                <SelectItem value="distribution">Distribuição</SelectItem>
+                <SelectItem value="landslide">Deslizamento</SelectItem>
+                <SelectItem value="burial">Soterramento</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </form.Field>
 
       <div className="space-y-2">
         <Label>Localização</Label>

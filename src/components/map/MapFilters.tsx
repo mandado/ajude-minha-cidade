@@ -16,9 +16,8 @@ import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
   POINT_TYPE_LABELS,
   POINT_TYPE_COLORS,
-  PRIORITY_LABELS,
 } from "@/types/map";
-import type { PointType, PriorityLevel } from "@/types/database";
+import type { PointType } from "@/types/database";
 import { getCities } from "@/lib/actions/points";
 
 const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
@@ -32,7 +31,6 @@ const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string 
 interface MapFiltersProps {
   filters: MapFiltersType;
   toggleType: (type: PointType) => void;
-  togglePriority: (priority: PriorityLevel) => void;
   resetFilters: () => void;
   filteredCount: number;
   totalCount: number;
@@ -46,16 +44,9 @@ interface MapFiltersControlledProps extends MapFiltersProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-const PRIORITY_COLORS: Record<PriorityLevel, string> = {
-  high: "#ef4444",
-  medium: "#f59e0b",
-  low: "#6b7280",
-};
-
 export function FilterContent({
   filters,
   toggleType,
-  togglePriority,
   resetFilters,
   filteredCount,
   totalCount,
@@ -119,35 +110,6 @@ export function FilterContent({
                 </button>
               );
             },
-          )}
-        </div>
-      </div>
-
-      <div>
-        <h4 className="text-sm font-medium mb-3">Prioridade</h4>
-        <div className="flex flex-wrap gap-2">
-          {(Object.entries(PRIORITY_LABELS) as [PriorityLevel, string][]).map(
-            ([priority, label]) => (
-              <button
-                key={priority}
-                onClick={() => togglePriority(priority)}
-                className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
-                style={{
-                  backgroundColor: filters.priorities.includes(priority)
-                    ? `${PRIORITY_COLORS[priority]}20`
-                    : "transparent",
-                  borderColor: filters.priorities.includes(priority)
-                    ? PRIORITY_COLORS[priority]
-                    : "var(--border)",
-                }}
-              >
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: PRIORITY_COLORS[priority] }}
-                />
-                {label}
-              </button>
-            ),
           )}
         </div>
       </div>

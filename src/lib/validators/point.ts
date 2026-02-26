@@ -1,7 +1,6 @@
 import { z } from "zod/v4";
 
 export const pointTypeSchema = z.enum(["shelter", "collection", "distribution", "landslide", "burial"]);
-export const priorityLevelSchema = z.enum(["high", "medium", "low"]);
 export const pointStatusSchema = z.enum(["active", "inactive", "pending"]);
 
 const uuidRegex =
@@ -16,7 +15,6 @@ export const createPointSchema = z.object({
     .max(150, "Nome muito longo"),
   description: z.string().max(2000, "Descrição muito longa").optional(),
   type: pointTypeSchema,
-  priority: priorityLevelSchema,
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
   address: z.string().max(300, "Endereço muito longo").optional(),

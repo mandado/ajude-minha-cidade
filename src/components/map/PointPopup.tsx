@@ -8,14 +8,8 @@ import {
   House, Truck, MountainSnow, TriangleAlert,
 } from "lucide-react";
 import type { MapPoint } from "@/types/map";
-import { POINT_TYPE_LABELS, PRIORITY_LABELS, POINT_TYPE_COLORS } from "@/types/map";
-import type { PointType, PriorityLevel } from "@/types/database";
-
-const PRIORITY_CLASSES: Record<PriorityLevel, string> = {
-  high: "bg-red-100 text-red-700 border-red-200",
-  medium: "bg-amber-100 text-amber-700 border-amber-200",
-  low: "bg-gray-100 text-gray-600 border-gray-200",
-};
+import { POINT_TYPE_LABELS, POINT_TYPE_COLORS } from "@/types/map";
+import type { PointType } from "@/types/database";
 
 const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   shelter: House,
@@ -60,11 +54,6 @@ export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
                 }}
               >
                 {POINT_TYPE_LABELS[point.type]}
-              </Badge>
-              <Badge
-                className={`text-[10px] px-1.5 py-0 h-4 border font-medium ${PRIORITY_CLASSES[point.priority]}`}
-              >
-                {PRIORITY_LABELS[point.priority]}
               </Badge>
               {point.confirmations_count >= 3 && (
                 <Badge className="text-[10px] px-1.5 py-0 h-4 border font-medium bg-green-100 text-green-700 border-green-200">

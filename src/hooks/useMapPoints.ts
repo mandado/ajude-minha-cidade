@@ -4,11 +4,10 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import type { MapPoint, MapFilters } from "@/types/map";
-import type { PointType, PriorityLevel } from "@/types/database";
+import type { PointType } from "@/types/database";
 import type { Need } from "@/types/database";
 
 const ALL_TYPES: PointType[] = ["shelter", "collection", "distribution", "landslide", "burial"];
-const ALL_PRIORITIES: PriorityLevel[] = ["high", "medium", "low"];
 
 async function fetchPoints(): Promise<MapPoint[]> {
   const supabase = createClient();
@@ -86,7 +85,6 @@ async function fetchPoints(): Promise<MapPoint[]> {
 export function useMapPoints() {
   const [filters, setFilters] = useState<MapFilters>({
     types: ALL_TYPES,
-    priorities: ALL_PRIORITIES,
   });
 
   const [cityFilter, setCityFilter] = useState<string[]>([]);
@@ -99,9 +97,8 @@ export function useMapPoints() {
   const filteredPoints = useMemo(() => {
     return points.filter((point) => {
       const matchesType = filters.types.includes(point.type);
-      const matchesPriority = filters.priorities.includes(point.priority);
       const matchesCity = cityFilter.length === 0 || (point.city && cityFilter.includes(point.city));
-      return matchesType && matchesPriority && matchesCity;
+      return matchesType && matchesCity;
     });
   }, [points, filters, cityFilter]);
 
@@ -114,15 +111,6 @@ export function useMapPoints() {
     }));
   };
 
-  const togglePriority = (priority: PriorityLevel) => {
-    setFilters((prev) => ({
-      ...prev,
-      priorities: prev.priorities.includes(priority)
-        ? prev.priorities.filter((p) => p !== priority)
-        : [...prev.priorities, priority],
-    }));
-  };
-
   const toggleCity = (city: string) => {
     setCityFilter((prev) =>
       prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city],
@@ -130,7 +118,7 @@ export function useMapPoints() {
   };
 
   const resetFilters = () => {
-    setFilters({ types: ALL_TYPES, priorities: ALL_PRIORITIES });
+    setFilters({ types: ALL_TYPES });
     setCityFilter([]);
   };
 
@@ -139,7 +127,6 @@ export function useMapPoints() {
     allPoints: points,
     filters,
     toggleType,
-    togglePriority,
     resetFilters,
     totalPoints: points.length,
     isLoading,

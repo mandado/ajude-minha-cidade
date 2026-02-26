@@ -49,7 +49,6 @@ export function CreatePointDialog({
       name: "",
       description: "",
       type: "shelter",
-      priority: "medium",
       latitude: null as number | null,
       longitude: null as number | null,
       address: "",
@@ -73,7 +72,6 @@ export function CreatePointDialog({
           name: value.name,
           description: value.description || undefined,
           type: value.type,
-          priority: value.priority,
           latitude: lat,
           longitude: lng,
           address: value.address || undefined,
@@ -203,76 +201,53 @@ export function CreatePointDialog({
             )}
           </form.Field>
 
-          <div className="grid grid-cols-2 gap-4">
-            <form.Field name="type">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label>Tipo *</Label>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={field.handleChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="shelter">
-                        <span className="flex items-center gap-2">
-                          <House className="size-4 text-blue-500" />
-                          Abrigo
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="collection">
-                        <span className="flex items-center gap-2">
-                          <Package className="size-4 text-green-500" />
-                          Ponto de Coleta
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="distribution">
-                        <span className="flex items-center gap-2">
-                          <Truck className="size-4 text-orange-500" />
-                          Distribuição
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="landslide">
-                        <span className="flex items-center gap-2">
-                          <MountainSnow className="size-4 text-amber-700" />
-                          Deslizamento
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="burial">
-                        <span className="flex items-center gap-2">
-                          <TriangleAlert className="size-4 text-red-600" />
-                          Soterramento
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </form.Field>
-
-            <form.Field name="priority">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label>Prioridade *</Label>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={field.handleChange}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="high">Alta</SelectItem>
-                      <SelectItem value="medium">Média</SelectItem>
-                      <SelectItem value="low">Baixa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </form.Field>
-          </div>
+          <form.Field name="type">
+            {(field) => (
+              <div className="space-y-2">
+                <Label>Tipo *</Label>
+                <Select
+                  value={field.state.value}
+                  onValueChange={field.handleChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="shelter">
+                      <span className="flex items-center gap-2">
+                        <House className="size-4 text-blue-500" />
+                        Abrigo
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="collection">
+                      <span className="flex items-center gap-2">
+                        <Package className="size-4 text-green-500" />
+                        Ponto de Coleta
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="distribution">
+                      <span className="flex items-center gap-2">
+                        <Truck className="size-4 text-orange-500" />
+                        Distribuição
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="landslide">
+                      <span className="flex items-center gap-2">
+                        <MountainSnow className="size-4 text-amber-700" />
+                        Deslizamento
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="burial">
+                      <span className="flex items-center gap-2">
+                        <TriangleAlert className="size-4 text-red-600" />
+                        Soterramento
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </form.Field>
 
           <form.Field
             name="latitude"

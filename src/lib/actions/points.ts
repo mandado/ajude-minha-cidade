@@ -15,7 +15,6 @@ interface CreatePointData {
     name: string;
     description?: string;
     type: string;
-    priority: string;
     latitude: number;
     longitude: number;
     address?: string;
@@ -62,7 +61,6 @@ export async function createPoint(data: CreatePointData) {
       name: pointData.name,
       description: pointData.description || null,
       type: pointData.type,
-      priority: pointData.priority,
       status: "active",
       latitude: pointData.latitude,
       longitude: pointData.longitude,
@@ -110,7 +108,6 @@ export async function updatePoint(
     name?: string;
     description?: string | null;
     type?: string;
-    priority?: string;
     latitude?: number;
     longitude?: number;
     address?: string | null;
@@ -153,7 +150,6 @@ export async function updatePoint(
   if (validData.name !== undefined) updateData.name = validData.name.trim();
   updateData.description = data.description ?? undefined;
   if (validData.type) updateData.type = validData.type;
-  if (validData.priority) updateData.priority = validData.priority;
   if (validData.latitude !== undefined && validData.longitude !== undefined) {
     updateData.latitude = validData.latitude;
     updateData.longitude = validData.longitude;
