@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import { PointMarker } from "./PointMarker";
@@ -14,9 +14,10 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
 import { HelpDialog } from "./HelpDialog";
+import { FeedbackDialog } from "./FeedbackDialog";
 import { BlockedStreetOverlay } from "./BlockedStreetOverlay";
 import { Button } from "@/components/ui/button";
-import { Filter, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import { Filter, HelpCircle, LogOut, MessageSquareDot, Plus, User } from "lucide-react";
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap } from "leaflet";
@@ -29,7 +30,7 @@ function FlyToHandler({
   mapRef,
   onViewChange,
 }: {
-  mapRef: React.MutableRefObject<LeafletMap | null>;
+  mapRef: React.RefObject<LeafletMap | null>;
   onViewChange: (lat: number, lng: number, zoom: number) => void;
 }) {
   const map = useMap();
@@ -71,6 +72,7 @@ export default function Map() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [showBlockedStreets, setShowBlockedStreets] = useState(true);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
@@ -162,6 +164,15 @@ export default function Map() {
           onClick={() => setHelpOpen(true)}
         >
           <HelpCircle className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 shadow-md bg-background"
+          title="Enviar feedback"
+          onClick={() => setFeedbackOpen(true)}
+        >
+          <MessageSquareDot className="h-4 w-4" />
         </Button>
       </div>
 
@@ -285,11 +296,24 @@ export default function Map() {
             <HelpCircle className="h-5 w-5" />
             <span className="text-xs">Ajuda</span>
           </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
+            onClick={() => setFeedbackOpen(true)}
+          >
+            <MessageSquareDot className="h-5 w-5" />
+            <span className="text-xs">Feedback</span>
+          </Button>
         </div>
       </div>
 
       {/* Help dialog */}
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+
+      {/* Feedback dialog */}
+      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
 
       {/* Footer links — visíveis para crawlers e Google OAuth verification */}
       <div className="hidden md:flex absolute bottom-2 left-1/2 -translate-x-1/2 z-[999] items-center gap-3 text-[11px] text-muted-foreground/70">
