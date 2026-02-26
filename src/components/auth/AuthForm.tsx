@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 type Mode = "login" | "register";
 
 const SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!;
+const IS_DEV = process.env.NODE_ENV === "development";
 
 export function AuthForm() {
   const router = useRouter();
@@ -35,7 +36,7 @@ export function AuthForm() {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
-        options: { captchaToken },
+        options: { captchaToken: IS_DEV ? undefined : captchaToken },
       });
 
       if (error) {
@@ -63,7 +64,7 @@ export function AuthForm() {
         email,
         password,
         options: {
-          captchaToken,
+          captchaToken: IS_DEV ? undefined : captchaToken,
           data: { full_name: fullName.trim() },
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
         },
@@ -138,13 +139,15 @@ export function AuthForm() {
           />
         </div>
 
-        <Turnstile
-          ref={turnstileRef}
-          siteKey={SITE_KEY}
-          onSuccess={(token) => setCaptchaToken(token)}
-          onExpire={() => setCaptchaToken(undefined)}
-          options={{ theme: "auto", language: "pt-BR" }}
-        />
+        {!IS_DEV && (
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={SITE_KEY}
+            onSuccess={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(undefined)}
+            options={{ theme: "auto", language: "pt-BR" }}
+          />
+        )}
 
         {error && (
           <p className="text-sm text-destructive">{error}</p>
@@ -153,7 +156,7 @@ export function AuthForm() {
         <Button
           type="submit"
           className="w-full h-11"
-          disabled={loading || !captchaToken}
+          disabled={loading || (!IS_DEV && !captchaToken)}
         >
           {loading
             ? "Aguarde..."
