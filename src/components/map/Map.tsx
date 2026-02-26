@@ -15,8 +15,9 @@ import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
 import { HelpDialog } from "./HelpDialog";
 import { BlockedStreetOverlay } from "./BlockedStreetOverlay";
+import { AddBlockedStreetDialog } from "./AddBlockedStreetDialog";
 import { Button } from "@/components/ui/button";
-import { Filter, HelpCircle, LogOut, Plus, User } from "lucide-react";
+import { Construction, Filter, HelpCircle, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap } from "leaflet";
@@ -72,6 +73,7 @@ export default function Map() {
   const [createOpen, setCreateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [showBlockedStreets, setShowBlockedStreets] = useState(true);
+  const [addBlockedStreetOpen, setAddBlockedStreetOpen] = useState(false);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
     lat: BRAZIL_CENTER.lat,
@@ -146,14 +148,25 @@ export default function Map() {
       <div className="hidden md:flex absolute top-4 left-4 z-[1000] items-center gap-2">
         <UserMenu />
         {user && (
-          <Button
-            size="sm"
-            className="shadow-md"
-            onClick={() => setCreateOpen(true)}
-          >
-            <Plus className="h-4 w-4 mr-1.5" />
-            Novo Ponto
-          </Button>
+          <>
+            <Button
+              size="sm"
+              className="shadow-md"
+              onClick={() => setCreateOpen(true)}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Novo Ponto
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shadow-md bg-background border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+              onClick={() => setAddBlockedStreetOpen(true)}
+            >
+              <Construction className="h-4 w-4 mr-1.5" />
+              Rua bloqueada
+            </Button>
+          </>
         )}
         <Button
           variant="outline"
@@ -202,6 +215,12 @@ export default function Map() {
         onPointCreated={handlePointCreatedFlyTo}
       />
 
+      {/* Add blocked street dialog */}
+      <AddBlockedStreetDialog
+        open={addBlockedStreetOpen}
+        onOpenChange={setAddBlockedStreetOpen}
+      />
+
       {/* Point details sheet */}
       <PointDetailsSheet
         point={currentSelectedPoint}
@@ -227,14 +246,25 @@ export default function Map() {
           </Button>
 
           {user ? (
-            <Button
-              size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 px-4"
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus className="h-5 w-5" />
-              <span className="text-xs">Novo Ponto</span>
-            </Button>
+            <>
+              <Button
+                size="sm"
+                className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
+                onClick={() => setCreateOpen(true)}
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Novo Ponto</span>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="flex flex-col items-center gap-0.5 h-auto py-2 px-3 border-red-300 text-red-600"
+                onClick={() => setAddBlockedStreetOpen(true)}
+              >
+                <Construction className="h-5 w-5" />
+                <span className="text-xs">Rua bloq.</span>
+              </Button>
+            </>
           ) : (
             <Button
               size="sm"

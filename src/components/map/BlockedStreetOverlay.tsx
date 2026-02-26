@@ -4,8 +4,14 @@ import { Fragment, useMemo } from "react";
 import { Marker, Polyline, Popup, Tooltip } from "react-leaflet";
 import { divIcon } from "leaflet";
 import { BLOCKED_STREETS } from "@/data/blocked-streets";
+import { useBlockedStreets } from "@/hooks/useBlockedStreets";
 
-function StreetPopup({ name, neighborhood, city, description }: {
+function StreetPopup({
+  name,
+  neighborhood,
+  city,
+  description,
+}: {
   name: string;
   neighborhood: string;
   city: string;
@@ -16,10 +22,14 @@ function StreetPopup({ name, neighborhood, city, description }: {
       <p className="font-semibold text-red-600">🚧 Rua Interditada</p>
       <p className="font-medium">{name}</p>
       {neighborhood && (
-        <p className="text-muted-foreground text-xs">{neighborhood} · {city}</p>
+        <p className="text-muted-foreground text-xs">
+          {neighborhood} · {city}
+        </p>
       )}
       {description && <p className="text-xs">{description}</p>}
-      <p className="text-[10px] text-muted-foreground pt-1">Fonte: Defesa Civil</p>
+      <p className="text-[10px] text-muted-foreground pt-1">
+        Fonte: Defesa Civil
+      </p>
     </div>
   );
 }
@@ -49,11 +59,26 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
     [],
   );
 
-  if (!show || BLOCKED_STREETS.length === 0) return null;
+  const { data: dbStreets = [] } = useBlockedStreets();
+
+  const allStreets = useMemo(() => {
+    const fromDb = dbStreets.map((s) => ({
+      name: s.name,
+      neighborhood: s.neighborhood,
+      city: s.city,
+      description: s.description,
+      lat: s.lat,
+      lng: s.lng,
+      paths: s.paths,
+    }));
+    return [...BLOCKED_STREETS, ...fromDb];
+  }, [dbStreets]);
+
+  if (!show || allStreets.length === 0) return null;
 
   return (
     <>
-      {BLOCKED_STREETS.map((s, i) =>
+      {allStreets.map((s, i) =>
         s.paths && s.paths.length > 0 ? (
           <Fragment key={i}>
             {s.paths.map((segment: [number, number][], j: number) => (
