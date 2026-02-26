@@ -13,8 +13,10 @@ import { WeatherWidget } from "./WeatherWidget";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
+import { HelpDialog } from "./HelpDialog";
 import { Button } from "@/components/ui/button";
-import { Filter, Plus, User } from "lucide-react";
+import { Filter, HelpCircle, Plus, User } from "lucide-react";
+import Link from "next/link";
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap } from "leaflet";
 import type { MapPoint } from "@/types/map";
@@ -67,6 +69,7 @@ export default function Map() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
     lat: BRAZIL_CENTER.lat,
@@ -128,7 +131,7 @@ export default function Map() {
         ))}
       </MapContainer>
 
-      {/* Top-left: Auth + Create — desktop only */}
+      {/* Top-left: Auth + Create + Help — desktop only */}
       <div className="hidden md:flex absolute top-4 left-4 z-[1000] items-center gap-2">
         <UserMenu />
         {user && (
@@ -141,6 +144,14 @@ export default function Map() {
             Novo Ponto
           </Button>
         )}
+        <Button
+          variant="outline"
+          size="icon"
+          className="h-9 w-9 shadow-md bg-background"
+          onClick={() => setHelpOpen(true)}
+        >
+          <HelpCircle className="h-4 w-4" />
+        </Button>
       </div>
 
       {/* Loading indicator */}
@@ -248,7 +259,33 @@ export default function Map() {
               <span className="text-xs">Entrar</span>
             </Button>
           )}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
+            onClick={() => setHelpOpen(true)}
+          >
+            <HelpCircle className="h-5 w-5" />
+            <span className="text-xs">Ajuda</span>
+          </Button>
         </div>
+      </div>
+
+      {/* Help dialog */}
+      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+
+      {/* Footer links — visíveis para crawlers e Google OAuth verification */}
+      <div className="hidden md:flex absolute bottom-2 left-1/2 -translate-x-1/2 z-[999] items-center gap-3 text-[11px] text-muted-foreground/70">
+        <span>Ajuda Minha Cidade — Mapa colaborativo de apoio humanitário</span>
+        <span>·</span>
+        <Link href="/privacidade" className="hover:text-foreground underline transition-colors">
+          Política de Privacidade
+        </Link>
+        <span>·</span>
+        <Link href="/termos" className="hover:text-foreground underline transition-colors">
+          Termos de Uso
+        </Link>
       </div>
     </div>
   );

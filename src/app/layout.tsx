@@ -14,8 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ajuda Minha Cidade",
-  description: "Mapa solidário em tempo real — pontos de doação, abrigos e postos de coleta.",
+  title: "Ajuda Minha Cidade — Mapa Solidário em Tempo Real",
+  description:
+    "Ajuda Minha Cidade é uma plataforma colaborativa e gratuita que exibe em tempo real pontos de apoio humanitário: abrigos, coleta e distribuição de doações, deslizamentos e soterramentos. Ajude sua comunidade em situações de emergência.",
 };
 
 export default function RootLayout({
