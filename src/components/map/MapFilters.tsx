@@ -1,16 +1,18 @@
 "use client";
 
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { House, Package, Truck, MountainSnow, TriangleAlert, Construction } from "lucide-react";
+import { House, Package, Truck, MountainSnow, TriangleAlert, Construction, Search, MapPin, Loader2 } from "lucide-react";
 import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
   POINT_TYPE_LABELS,
@@ -58,11 +60,40 @@ export function FilterContent({
   showBlockedStreets,
   onToggleBlockedStreets,
 }: MapFiltersProps) {
+  const [citySearch, setCitySearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(citySearch), 400);
+    return () => clearTimeout(t);
+  }, [citySearch]);
+
   const { data: cityCounts = [] } = useQuery({
     queryKey: ["cities"],
     queryFn: () => getCities(),
     staleTime: 60_000,
   });
+
+  const normalize = (s: string) =>
+    s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+  const filteredCities = citySearch.trim()
+    ? cityCounts.filter((c) => normalize(c.city).includes(normalize(citySearch)))
+    : cityCounts;
+
+  const { data: geocodeResults = [], isFetching: isGeoLoading } = useQuery({
+    queryKey: ["geocode", "city", debouncedSearch],
+    queryFn: async () => {
+      const res = await fetch(`/api/geocode?q=${encodeURIComponent(debouncedSearch)}&type=city`);
+      return res.json() as Promise<{ id: string; display_name: string; lat: number; lng: number; city: string; state: string }[]>;
+    },
+    enabled: debouncedSearch.trim().length >= 3,
+    staleTime: 60_000,
+  });
+
+  const geocodedOnly = geocodeResults.filter(
+    (g) => !cityCounts.some((c) => normalize(c.city) === normalize(g.city || g.display_name))
+  );
 
   const handleCityClick = (item: { city: string; lat: number; lng: number }) => {
     const isRemoving = cityFilter.includes(item.city);
@@ -119,12 +150,26 @@ export function FilterContent({
         </div>
       </div>
 
-      {cityCounts.length > 0 && (
-        <div>
+      <div>
           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cidade</h4>
+          <div className="relative mb-2">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+            <Input
+              value={citySearch}
+              onChange={(e) => setCitySearch(e.target.value)}
+              placeholder="Buscar cidade..."
+              className="pl-8 h-8 text-sm"
+            />
+            {isGeoLoading && (
+              <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 animate-spin text-muted-foreground" />
+            )}
+          </div>
           <div className="h-36 overflow-y-auto">
             <div className="flex flex-wrap gap-1.5 pr-1">
-              {cityCounts.map((item) => {
+              {!isGeoLoading && citySearch.trim().length > 0 && filteredCities.length === 0 && geocodedOnly.length === 0 && (
+                <p className="text-xs text-muted-foreground py-1">Nenhuma cidade encontrada.</p>
+              )}
+              {filteredCities.map((item) => {
                 const isActive = cityFilter.includes(item.city);
                 return (
                   <button
@@ -147,10 +192,23 @@ export function FilterContent({
                   </button>
                 );
               })}
+              {geocodedOnly.map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => {
+                    onCitySelect?.(g.city || g.display_name, g.lat, g.lng);
+                    setCitySearch("");
+                  }}
+                  className="flex items-center gap-1.5 rounded-lg border border-dashed px-2.5 py-1.5 text-sm transition-colors hover:bg-accent text-muted-foreground"
+                >
+                  <MapPin className="size-3 shrink-0" />
+                  {g.city || g.display_name}
+                  {g.state && `/${g.state}`}
+                </button>
+              ))}
             </div>
           </div>
         </div>
-      )}
 
       <div className="pt-2 border-t space-y-2">
         <button
