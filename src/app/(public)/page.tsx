@@ -14,27 +14,26 @@ const Map = dynamic(() => import("@/components/map/Map"), {
 
 export default function HomePage() {
   return (
-    <main className="h-screen w-full relative">
-      {/*
-        Conteúdo semântico para crawlers (Google OAuth verification).
-        sr-only: invisível na tela, presente no HTML server-rendered.
-        Descreve a finalidade do app e inclui o link para Política de Privacidade.
-      */}
-      <div className="sr-only">
-        <h1>Ajude Minha Cidade</h1>
-        <p>
-          Ajude Minha Cidade é uma plataforma colaborativa e gratuita de apoio
-          humanitário. Exibe em tempo real pontos de abrigo, coleta e
-          distribuição de doações, além de ocorrências de deslizamentos e
-          soterramentos. Ajude sua comunidade em situações de emergência.
-        </p>
-        <nav>
-          <Link href="/privacidade">Política de Privacidade</Link>
-          <Link href="/termos">Termos de Uso</Link>
-        </nav>
+    <main className="h-screen w-full relative flex flex-col">
+      <div className="flex-1 relative">
+        <Map />
       </div>
 
-      <Map />
+      {/* Rodapé visível — satisfaz requisitos do Google OAuth (nome, finalidade, política de privacidade) */}
+      <footer className="w-full bg-background/95 border-t px-4 py-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-xs text-muted-foreground z-[1001]">
+        <div className="flex items-center gap-1">
+          <h1 className="font-semibold text-foreground text-xs">Ajude Minha Cidade</h1>
+          <span>— Mapa colaborativo de apoio humanitário em situações de emergência</span>
+        </div>
+        <nav className="flex items-center gap-3">
+          <Link href="/privacidade" className="underline hover:text-foreground transition-colors">
+            Política de Privacidade
+          </Link>
+          <Link href="/termos" className="hover:text-foreground transition-colors">
+            Termos de Uso
+          </Link>
+        </nav>
+      </footer>
     </main>
   );
 }
