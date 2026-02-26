@@ -18,7 +18,13 @@ import { FeedbackDialog } from "./FeedbackDialog";
 import { BlockedStreetOverlay } from "./BlockedStreetOverlay";
 import { AddBlockedStreetDialog } from "./AddBlockedStreetDialog";
 import { Button } from "@/components/ui/button";
-import { Filter, HelpCircle, LogOut, MessageSquareDot, Plus, User,Construction } from "lucide-react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { ChevronRight, Construction, Filter, HelpCircle, LogOut, MapPin, MessageSquareDot, User } from "lucide-react";
 
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
@@ -77,6 +83,7 @@ export default function Map() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [showBlockedStreets, setShowBlockedStreets] = useState(true);
   const [addBlockedStreetOpen, setAddBlockedStreetOpen] = useState(false);
+  const [contributeOpen, setContributeOpen] = useState(false);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
     lat: BRAZIL_CENTER.lat,
@@ -147,30 +154,37 @@ export default function Map() {
         ))}
       </MapContainer>
 
-      {/* Top-left: Auth + Create + Help — desktop only */}
+      {/* Top-left: Auth + Actions — desktop only */}
       <div className="hidden md:flex absolute top-4 left-4 z-[1000] items-center gap-2">
         <UserMenu />
-        {user && (
-          <>
-            <Button
-              size="sm"
-              className="shadow-md"
-              onClick={() => setCreateOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Novo Ponto
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="shadow-md bg-background border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-              onClick={() => setAddBlockedStreetOpen(true)}
-            >
-              <Construction className="h-4 w-4 mr-1.5" />
-              Rua bloqueada
-            </Button>
-          </>
-        )}
+        <div className="flex items-center gap-1.5 bg-background/95 backdrop-blur-sm border rounded-lg shadow-md p-1.5">
+          {user ? (
+            <>
+              <Button
+                size="sm"
+                className="h-8 px-3 text-sm font-semibold"
+                onClick={() => setCreateOpen(true)}
+              >
+                <MapPin className="h-4 w-4 mr-1.5" />
+                Novo ponto de ajuda
+              </Button>
+              <div className="w-px h-5 bg-border" />
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-8 px-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={() => setAddBlockedStreetOpen(true)}
+              >
+                <Construction className="h-4 w-4 mr-1.5" />
+                Reportar rua fechada
+              </Button>
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground px-2">
+              Entre para contribuir
+            </span>
+          )}
+        </div>
         <Button
           variant="outline"
           size="icon"
@@ -231,6 +245,7 @@ export default function Map() {
       <AddBlockedStreetDialog
         open={addBlockedStreetOpen}
         onOpenChange={setAddBlockedStreetOpen}
+        proximity={mapCenter}
       />
 
       {/* Point details sheet */}
@@ -241,107 +256,130 @@ export default function Map() {
         isOwner={canEdit}
       />
 
-      {/* Mobile bottom bar */}
+      {/* Mobile bottom bar — 4 itens fixos */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-[1000] bg-background/95 backdrop-blur-sm border-t pb-[env(safe-area-inset-bottom)]">
-        <div className="flex items-center justify-around px-4 py-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center gap-0.5 h-auto py-2 px-3 relative"
+        <div className="grid grid-cols-4 px-2 py-1">
+          {/* Filtros */}
+          <button
+            className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg relative"
             onClick={() => setFiltersOpen(true)}
           >
-            <Filter className="h-5 w-5" />
-            <span className="text-xs">Filtros</span>
+            <Filter className="h-6 w-6 text-muted-foreground" />
+            <span className="text-[11px] text-muted-foreground font-medium">Filtros</span>
             {hasActiveFilters && (
-              <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
+              <span className="absolute top-1.5 right-4 h-2 w-2 rounded-full bg-primary" />
             )}
-          </Button>
+          </button>
 
+          {/* Contribuir / Entrar */}
           {user ? (
-            <>
-              <Button
-                size="sm"
-                className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
-                onClick={() => setCreateOpen(true)}
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Novo Ponto</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="flex flex-col items-center gap-0.5 h-auto py-2 px-3 border-red-300 text-red-600"
-                onClick={() => setAddBlockedStreetOpen(true)}
-              >
-                <Construction className="h-5 w-5" />
-                <span className="text-xs">Rua bloq.</span>
-              </Button>
-            </>
+            <button
+              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg bg-primary mx-1"
+              onClick={() => setContributeOpen(true)}
+            >
+              <MapPin className="h-6 w-6 text-primary-foreground" />
+              <span className="text-[11px] text-primary-foreground font-semibold">Contribuir</span>
+            </button>
           ) : (
-            <Button
-              size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 px-4"
+            <button
+              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg bg-primary mx-1"
               onClick={() => router.push("/login")}
             >
-              <Plus className="h-5 w-5" />
-              <span className="text-xs">Novo Ponto</span>
-            </Button>
+              <User className="h-6 w-6 text-primary-foreground" />
+              <span className="text-[11px] text-primary-foreground font-semibold">Entrar</span>
+            </button>
           )}
 
+          {/* Ajuda */}
+          <button
+            className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg"
+            onClick={() => setHelpOpen(true)}
+          >
+            <HelpCircle className="h-6 w-6 text-muted-foreground" />
+            <span className="text-[11px] text-muted-foreground font-medium">Ajuda</span>
+          </button>
+
+          {/* Conta */}
           {user ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
+            <button
+              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg"
               onClick={async () => {
                 const supabase = (await import("@/lib/supabase/client")).createClient();
                 await supabase.auth.signOut();
                 router.refresh();
               }}
             >
-              <LogOut className="h-5 w-5" />
-              <span className="text-xs truncate max-w-[4rem]">
-                {user.user_metadata?.full_name ||
-                  user.email?.split("@")[0] ||
-                  "Sair"}
-              </span>
-            </Button>
+              <LogOut className="h-6 w-6 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground font-medium">Sair</span>
+            </button>
           ) : (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
-              onClick={() => router.push("/login")}
+            <button
+              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg"
+              onClick={() => setFeedbackOpen(true)}
             >
-              <User className="h-5 w-5" />
-              <span className="text-xs">Entrar</span>
-            </Button>
+              <MessageSquareDot className="h-6 w-6 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground font-medium">Feedback</span>
+            </button>
           )}
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
-            onClick={() => setHelpOpen(true)}
-          >
-            <HelpCircle className="h-5 w-5" />
-            <span className="text-xs">Ajuda</span>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
-            onClick={() => setFeedbackOpen(true)}
-          >
-            <MessageSquareDot className="h-5 w-5" />
-            <span className="text-xs">Feedback</span>
-          </Button>
         </div>
       </div>
 
+      {/* Mini-sheet de contribuição (mobile) */}
+      <Drawer open={contributeOpen} onOpenChange={setContributeOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>O que deseja registrar?</DrawerTitle>
+          </DrawerHeader>
+          <div className="px-4 pt-2 pb-8 space-y-3">
+            <button
+              className="w-full flex items-center gap-4 rounded-xl border p-4 text-left hover:bg-accent transition-colors"
+              onClick={() => { setContributeOpen(false); setCreateOpen(true); }}
+            >
+              <span className="flex items-center justify-center size-12 rounded-xl bg-primary/10 shrink-0">
+                <MapPin className="size-6 text-primary" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base">Ponto de ajuda</p>
+                <p className="text-sm text-muted-foreground">Abrigo, coleta, distribuição ou risco</p>
+              </div>
+              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+            </button>
+            <button
+              className="w-full flex items-center gap-4 rounded-xl border p-4 text-left hover:bg-accent transition-colors"
+              onClick={() => { setContributeOpen(false); setAddBlockedStreetOpen(true); }}
+            >
+              <span className="flex items-center justify-center size-12 rounded-xl bg-red-50 shrink-0">
+                <Construction className="size-6 text-red-600" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base">Reportar rua fechada</p>
+                <p className="text-sm text-muted-foreground">Via interditada, alagada ou perigosa</p>
+              </div>
+              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+            </button>
+            <button
+              className="w-full flex items-center gap-4 rounded-xl border p-4 text-left hover:bg-accent transition-colors"
+              onClick={() => { setContributeOpen(false); setFeedbackOpen(true); }}
+            >
+              <span className="flex items-center justify-center size-12 rounded-xl bg-muted shrink-0">
+                <MessageSquareDot className="size-6 text-muted-foreground" />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-base">Enviar feedback</p>
+                <p className="text-sm text-muted-foreground">Sugestão, erro ou elogio sobre o app</p>
+              </div>
+              <ChevronRight className="size-5 text-muted-foreground shrink-0" />
+            </button>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
       {/* Help dialog */}
-      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+      <HelpDialog
+        open={helpOpen}
+        onOpenChange={setHelpOpen}
+        onFeedback={() => setFeedbackOpen(true)}
+      />
 
       {/* Feedback dialog */}
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />

@@ -53,12 +53,12 @@ export function ModerationButtons({ point }: ModerationButtonsProps) {
       </p>
 
       {confirmed ? (
-        <p className="text-sm text-green-700 font-medium flex items-center gap-1.5">
+        <p className="text-sm text-green-700 font-medium flex items-center gap-1">
           <CheckCircle className="size-4" />
           Obrigado por confirmar!
         </p>
       ) : reported ? (
-        <p className="text-sm text-orange-700 font-medium flex items-center gap-1.5">
+        <p className="text-sm text-orange-700 font-medium flex items-center gap-1">
           <Flag className="size-4" />
           Denúncia enviada. Obrigado!
         </p>
@@ -72,7 +72,7 @@ export function ModerationButtons({ point }: ModerationButtonsProps) {
               onClick={handleConfirm}
               disabled={confirmMutation.isPending}
             >
-              <CheckCircle className="size-4 mr-1.5" />
+              <CheckCircle className="size-4" />
               Confirmo que existe
               {point.confirmations_count > 0 && (
                 <span className="ml-1 text-xs text-muted-foreground">
@@ -87,7 +87,7 @@ export function ModerationButtons({ point }: ModerationButtonsProps) {
               onClick={() => setShowReportInput(!showReportInput)}
               disabled={reportMutation.isPending}
             >
-              <Flag className="size-4 mr-1.5" />
+              <Flag className="size-4" />
               Denunciar
             </Button>
           </div>
@@ -109,14 +109,19 @@ export function ModerationButtons({ point }: ModerationButtonsProps) {
                   variant="destructive"
                   className="flex-1"
                   onClick={handleReport}
-                  disabled={reportMutation.isPending || reportReason.trim().length < 3}
+                  disabled={
+                    reportMutation.isPending || reportReason.trim().length < 3
+                  }
                 >
                   {reportMutation.isPending ? "Enviando..." : "Enviar denúncia"}
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => { setShowReportInput(false); setReportReason(""); }}
+                  onClick={() => {
+                    setShowReportInput(false);
+                    setReportReason("");
+                  }}
                 >
                   Cancelar
                 </Button>

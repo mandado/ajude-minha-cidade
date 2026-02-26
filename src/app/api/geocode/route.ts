@@ -10,6 +10,7 @@ interface GeocodeResult {
   city: string;
   state: string;
   neighborhood: string;
+  street: string;
 }
 
 interface MapboxFeature {
@@ -22,6 +23,7 @@ interface MapboxFeature {
       region?: { region_code?: string; name?: string };
       neighborhood?: { name?: string };
       locality?: { name?: string };
+      street?: { name?: string };
     };
   };
   geometry: {
@@ -51,6 +53,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const query = searchParams.get("q")?.trim();
   const type = searchParams.get("type") || "address";
+  const proximity = searchParams.get("proximity"); // "lng,lat" opcional
 
   if (!query || query.length < 2) {
     return NextResponse.json([]);
@@ -64,24 +67,24 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const cacheKey = `geocode:${type}:${query.toLowerCase()}`;
+  const cacheKey = `geocode:v3:${type}:${proximity ?? ""}:${query.toLowerCase()}`;
   const cached = await redis.get<GeocodeResult[]>(cacheKey);
   if (cached) {
     return NextResponse.json(cached);
   }
 
-  const types =
-    type === "city" ? "place" : "address,place,locality,neighborhood";
-
-  const url = new URL(
-    "https://api.mapbox.com/search/geocode/v6/forward",
-  );
+  const url = new URL("https://api.mapbox.com/search/geocode/v6/forward");
   url.searchParams.set("q", query);
   url.searchParams.set("access_token", token);
   url.searchParams.set("country", "br");
-  url.searchParams.set("language", "pt");
+  url.searchParams.set("language", "pt-BR");
   url.searchParams.set("limit", "5");
-  url.searchParams.set("types", types);
+  if (type === "city") {
+    url.searchParams.set("types", "place");
+  }
+  if (proximity) {
+    url.searchParams.set("proximity", proximity);
+  }
 
   try {
     const res = await fetch(url.toString());
@@ -115,6 +118,7 @@ export async function GET(request: NextRequest) {
         state,
         neighborhood:
           ctx?.neighborhood?.name || ctx?.locality?.name || "",
+        street: ctx?.street?.name || f.properties.name || "",
       };
     });
 

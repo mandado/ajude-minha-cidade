@@ -9,7 +9,7 @@ export function useBlockedStreets() {
   return useQuery({
     queryKey: ["blocked-streets"],
     queryFn: getBlockedStreets,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 30_000,
   });
 }
 

@@ -13,6 +13,7 @@ interface GeocodeResult {
   city: string;
   state: string;
   neighborhood: string;
+  street: string;
 }
 
 export interface GeoSearchResult {
@@ -22,18 +23,21 @@ export interface GeoSearchResult {
   city: string;
   state: string;
   neighborhood: string;
+  street: string;
 }
 
 interface GeoSearchProps {
   placeholder?: string;
   onSelect: (result: GeoSearchResult) => void;
   className?: string;
+  proximity?: { lat: number; lng: number };
 }
 
 export function GeoSearch({
   placeholder = "Buscar endereço...",
   onSelect,
   className,
+  proximity,
 }: GeoSearchProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -47,11 +51,11 @@ export function GeoSearch({
   }, [query]);
 
   const { data: results = [], isLoading } = useQuery({
-    queryKey: ["geocode", "address", debouncedQuery],
+    queryKey: ["geocode", "address", debouncedQuery, proximity],
     queryFn: async () => {
-      const res = await fetch(
-        `/api/geocode?q=${encodeURIComponent(debouncedQuery)}&type=address`,
-      );
+      const params = new URLSearchParams({ q: debouncedQuery, type: "address" });
+      if (proximity) params.set("proximity", `${proximity.lng},${proximity.lat}`);
+      const res = await fetch(`/api/geocode?${params.toString()}`);
       return res.json() as Promise<GeocodeResult[]>;
     },
     enabled: debouncedQuery.length >= 3,
@@ -75,6 +79,7 @@ export function GeoSearch({
       city: result.city,
       state: result.state,
       neighborhood: result.neighborhood,
+      street: result.street,
     });
   };
 

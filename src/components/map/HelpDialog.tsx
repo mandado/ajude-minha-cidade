@@ -21,14 +21,16 @@ import {
   Truck,
   MountainSnow,
   TriangleAlert,
+  MessageSquareDot,
 } from "lucide-react";
 
 interface HelpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onFeedback?: () => void;
 }
 
-export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
+export function HelpDialog({ open, onOpenChange, onFeedback }: HelpDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[80vh] overflow-y-auto">

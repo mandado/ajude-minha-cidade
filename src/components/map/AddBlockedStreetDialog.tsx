@@ -20,12 +20,14 @@ interface AddBlockedStreetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated?: () => void;
+  proximity?: { lat: number; lng: number };
 }
 
 export function AddBlockedStreetDialog({
   open,
   onOpenChange,
   onCreated,
+  proximity,
 }: AddBlockedStreetDialogProps) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -47,10 +49,8 @@ export function AddBlockedStreetDialog({
   const handleGeoSelect = (result: GeoSearchResult) => {
     setLocation(result);
     setError("");
-    // Auto-fill name from the result if empty
     if (!name.trim()) {
-      const parts = result.displayName.split(",");
-      setName(parts[0]?.trim() ?? "");
+      setName(result.street || result.displayName.split(",")[0]?.trim() || "");
     }
   };
 
@@ -93,7 +93,7 @@ export function AddBlockedStreetDialog({
                 <Construction className="size-5 text-red-600" />
               </span>
               <div>
-                <DrawerTitle>Registrar Rua Bloqueada</DrawerTitle>
+                <DrawerTitle>Reportar Rua Fechada</DrawerTitle>
                 <DrawerDescription>
                   Informe uma via interditada para alertar outras pessoas.
                 </DrawerDescription>
@@ -102,7 +102,6 @@ export function AddBlockedStreetDialog({
           </DrawerHeader>
 
           <div className="space-y-4 px-4 pb-8">
-            {/* Localização primeiro — auto-preenche o nome */}
             <div className="space-y-2">
               <Label>
                 Localização da rua <span className="text-destructive">*</span>
@@ -110,6 +109,7 @@ export function AddBlockedStreetDialog({
               <GeoSearch
                 placeholder="Buscar rua, bairro ou ponto de referência..."
                 onSelect={handleGeoSelect}
+                proximity={proximity}
               />
               {location && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -121,7 +121,6 @@ export function AddBlockedStreetDialog({
               )}
             </div>
 
-            {/* Nome da rua */}
             <div className="space-y-2">
               <Label>
                 Nome da rua <span className="text-destructive">*</span>
@@ -133,7 +132,6 @@ export function AddBlockedStreetDialog({
               />
             </div>
 
-            {/* Motivo */}
             <div className="space-y-2">
               <Label>Motivo do bloqueio</Label>
               <Textarea

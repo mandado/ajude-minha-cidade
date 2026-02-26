@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { fetchStreetPaths } from "@/lib/street-paths";
 
 export interface BlockedStreetRow {
   id: string;
@@ -16,38 +17,6 @@ export interface BlockedStreetRow {
   created_at: string;
 }
 
-// ── Busca geometria real da via via Overpass API ──
-async function fetchStreetPaths(
-  name: string,
-  lat: number,
-  lng: number,
-): Promise<[number, number][][] | null> {
-  try {
-    const query = `[out:json];way["name"="${name}"](around:600,${lat},${lng});out geom;`;
-    const res = await fetch(
-      `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`,
-      {
-        headers: { "User-Agent": "AjudaMinhaCidade/1.0" },
-        next: { revalidate: 0 },
-      },
-    );
-    const data = await res.json();
-    if (!data.elements?.length) return null;
-
-    const paths: [number, number][][] = data.elements
-      .filter(
-        (el: { type: string; geometry?: { lat: number; lon: number }[] }) =>
-          el.type === "way" && el.geometry?.length,
-      )
-      .map((el: { geometry: { lat: number; lon: number }[] }) =>
-        el.geometry.map((pt) => [pt.lat, pt.lon] as [number, number]),
-      );
-
-    return paths.length ? paths : null;
-  } catch {
-    return null;
-  }
-}
 
 export async function getBlockedStreets(): Promise<BlockedStreetRow[]> {
   const supabase = await createClient();
@@ -123,8 +92,7 @@ export async function deleteBlockedStreet(
   const { error } = await supabase
     .from("blocked_streets")
     .delete()
-    .eq("id", id)
-    .eq("created_by", user.id);
+    .eq("id", id);
 
   if (error) {
     console.error("[deleteBlockedStreet]", error);
