@@ -10,7 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { House, Package, Truck, MountainSnow, TriangleAlert } from "lucide-react";
+import { House, Package, Truck, MountainSnow, TriangleAlert, Construction } from "lucide-react";
 import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
   POINT_TYPE_LABELS,
@@ -36,12 +36,15 @@ interface MapFiltersProps {
   cityFilter: string[];
   onCityToggle: (city: string) => void;
   onCitySelect?: (city: string, lat: number, lng: number) => void;
+  showBlockedStreets: boolean;
+  onToggleBlockedStreets: () => void;
 }
 
 interface MapFiltersControlledProps extends MapFiltersProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
+
 
 export function FilterContent({
   filters,
@@ -52,6 +55,8 @@ export function FilterContent({
   cityFilter,
   onCityToggle,
   onCitySelect,
+  showBlockedStreets,
+  onToggleBlockedStreets,
 }: MapFiltersProps) {
   const { data: cityCounts = [] } = useQuery({
     queryKey: ["cities"],
@@ -145,6 +150,21 @@ export function FilterContent({
           </div>
         </div>
       )}
+
+      <div>
+        <h4 className="text-sm font-medium mb-3">Camadas</h4>
+        <button
+          onClick={onToggleBlockedStreets}
+          className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
+            showBlockedStreets
+              ? "bg-red-50 border-red-400 text-red-600"
+              : "hover:bg-accent"
+          }`}
+        >
+          <Construction className="size-3.5 shrink-0" />
+          Ruas interditadas
+        </button>
+      </div>
 
       <div className="flex items-center justify-between pt-2 border-t">
         <span className="text-sm text-muted-foreground">

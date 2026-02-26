@@ -71,6 +71,7 @@ export default function Map() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [showBlockedStreets, setShowBlockedStreets] = useState(true);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
     lat: BRAZIL_CENTER.lat,
@@ -130,7 +131,7 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <FlyToHandler mapRef={mapRef} onViewChange={handleViewChange} />
-        <BlockedStreetOverlay />
+        <BlockedStreetOverlay show={showBlockedStreets} />
         {points.map((point) => (
           <PointMarker
             key={point.id}
@@ -188,6 +189,8 @@ export default function Map() {
         cityFilter={cityFilter}
         onCityToggle={toggleCity}
         onCitySelect={handleCityFilterSelect}
+        showBlockedStreets={showBlockedStreets}
+        onToggleBlockedStreets={() => setShowBlockedStreets((v) => !v)}
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
       />
