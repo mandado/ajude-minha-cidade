@@ -36,7 +36,10 @@ const ratelimit = new Ratelimit({
 });
 
 export async function GET(request: NextRequest) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "anonymous";
+  const ip =
+    request.headers.get("x-real-ip") ??
+    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    "anonymous";
   const { success } = await ratelimit.limit(ip);
   if (!success) {
     return NextResponse.json(

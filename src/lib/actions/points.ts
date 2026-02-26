@@ -3,14 +3,27 @@
 import { Redis } from "@upstash/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 import { createClient } from "@/lib/supabase/server";
-import { createPointSchema, needSchema } from "@/lib/validators/point";
+import {
+  createPointSchema,
+  needSchema,
+  updatePointSchema,
+  updateNeedSchema,
+  uuidSchema,
+} from "@/lib/validators/point";
 import type { NeedInput } from "@/lib/validators/point";
 
 const redis = Redis.fromEnv();
+
 const createPointRateLimit = new Ratelimit({
   redis,
   limiter: Ratelimit.slidingWindow(3, "1 d"),
   prefix: "create-point",
+});
+
+const mutationRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(30, "1 m"),
+  prefix: "point-mutation",
 });
 
 interface CreatePointData {
@@ -34,7 +47,6 @@ interface CreatePointData {
 export async function createPoint(data: CreatePointData) {
   const supabase = await createClient();
 
-  // Check auth
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -45,7 +57,9 @@ export async function createPoint(data: CreatePointData) {
   // Rate limit: 3 points per day per user
   const { success: withinLimit } = await createPointRateLimit.limit(user.id);
   if (!withinLimit) {
-    return { error: "Limite diário atingido. Você pode criar até 3 pontos por dia." };
+    return {
+      error: "Limite diário atingido. Você pode criar até 3 pontos por dia.",
+    };
   }
 
   // Validate point data
@@ -80,7 +94,7 @@ export async function createPoint(data: CreatePointData) {
       address: pointData.address || null,
       city: pointData.city || null,
       state: pointData.state || null,
-      neighborhood: data.point.neighborhood || null,
+      neighborhood: pointData.neighborhood || null,
       phone: pointData.phone || null,
       operating_hours: pointData.operating_hours || null,
     })
@@ -88,7 +102,8 @@ export async function createPoint(data: CreatePointData) {
     .single();
 
   if (pointError) {
-    return { error: `Erro ao criar ponto: ${pointError.message}` };
+    console.error("[createPoint]", pointError.message);
+    return { error: "Erro ao criar ponto. Tente novamente." };
   }
 
   // Insert needs
@@ -105,7 +120,8 @@ export async function createPoint(data: CreatePointData) {
       .insert(needsToInsert);
 
     if (needsError) {
-      return { error: `Erro ao salvar necessidades: ${needsError.message}` };
+      console.error("[createPoint:needs]", needsError.message);
+      return { error: "Erro ao salvar necessidades. Tente novamente." };
     }
   }
 
@@ -129,6 +145,11 @@ export async function updatePoint(
     operating_hours?: string | null;
   },
 ) {
+  // Validate UUID
+  if (!uuidSchema.safeParse(pointId).success) {
+    return { error: "ID inválido." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -138,26 +159,42 @@ export async function updatePoint(
     return { error: "Você precisa estar logado." };
   }
 
-  if (data.name !== undefined && data.name.trim().length < 3) {
-    return { error: "Nome deve ter pelo menos 3 caracteres." };
+  // Rate limit
+  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Muitas requisições. Aguarde um momento." };
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (data.name !== undefined) updateData.name = data.name.trim();
-  if (data.description !== undefined) updateData.description = data.description || null;
-  if (data.type) updateData.type = data.type;
-  if (data.priority) updateData.priority = data.priority;
-  if (data.latitude !== undefined && data.longitude !== undefined) {
-    updateData.latitude = data.latitude;
-    updateData.longitude = data.longitude;
-    updateData.location = `SRID=4326;POINT(${data.longitude} ${data.latitude})`;
+  // Sanitize: convert null to undefined for Zod validation
+  const sanitized = Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, v === null ? undefined : v]),
+  );
+
+  // Validate with Zod
+  const parsed = updatePointSchema.safeParse(sanitized);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
   }
-  if (data.address !== undefined) updateData.address = data.address || null;
-  if (data.city !== undefined) updateData.city = data.city || null;
-  if (data.state !== undefined) updateData.state = data.state || null;
-  if (data.neighborhood !== undefined) updateData.neighborhood = data.neighborhood || null;
-  if (data.phone !== undefined) updateData.phone = data.phone || null;
-  if (data.operating_hours !== undefined) updateData.operating_hours = data.operating_hours || null;
+
+  const validData = parsed.data;
+  const updateData: Record<string, unknown> = {};
+
+  if (validData.name !== undefined) updateData.name = validData.name.trim();
+  updateData.description = data.description ?? undefined;
+  if (validData.type) updateData.type = validData.type;
+  if (validData.priority) updateData.priority = validData.priority;
+  if (validData.latitude !== undefined && validData.longitude !== undefined) {
+    updateData.latitude = validData.latitude;
+    updateData.longitude = validData.longitude;
+    updateData.location = `SRID=4326;POINT(${validData.longitude} ${validData.latitude})`;
+  }
+  if (data.address !== undefined) updateData.address = data.address;
+  if (data.city !== undefined) updateData.city = data.city;
+  if (data.state !== undefined) updateData.state = data.state;
+  if (data.neighborhood !== undefined) updateData.neighborhood = data.neighborhood;
+  if (data.phone !== undefined) updateData.phone = data.phone;
+  if (data.operating_hours !== undefined)
+    updateData.operating_hours = data.operating_hours;
 
   const { error } = await supabase
     .from("points")
@@ -165,7 +202,8 @@ export async function updatePoint(
     .eq("id", pointId);
 
   if (error) {
-    return { error: `Erro ao atualizar ponto: ${error.message}` };
+    console.error("[updatePoint]", error.message);
+    return { error: "Erro ao atualizar ponto. Tente novamente." };
   }
 
   return { success: true };
@@ -175,6 +213,11 @@ export async function addNeed(
   pointId: string,
   need: { description: string; quantity?: number; unit?: string },
 ) {
+  // Validate UUID
+  if (!uuidSchema.safeParse(pointId).success) {
+    return { error: "ID inválido." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -182,6 +225,12 @@ export async function addNeed(
   } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Você precisa estar logado." };
+  }
+
+  // Rate limit
+  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Muitas requisições. Aguarde um momento." };
   }
 
   const needResult = needSchema.safeParse(need);
@@ -201,7 +250,8 @@ export async function addNeed(
     .single();
 
   if (error) {
-    return { error: `Erro ao adicionar necessidade: ${error.message}` };
+    console.error("[addNeed]", error.message);
+    return { error: "Erro ao adicionar necessidade. Tente novamente." };
   }
 
   return { success: true, need: newNeed };
@@ -216,6 +266,11 @@ export async function updateNeed(
     is_fulfilled?: boolean;
   },
 ) {
+  // Validate UUID
+  if (!uuidSchema.safeParse(needId).success) {
+    return { error: "ID inválido." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -225,15 +280,28 @@ export async function updateNeed(
     return { error: "Você precisa estar logado." };
   }
 
+  // Rate limit
+  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Muitas requisições. Aguarde um momento." };
+  }
+
+  // Validate with Zod
+  const parsed = updateNeedSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0].message };
+  }
+
   const { data: updated, error } = await supabase
     .from("needs")
-    .update(data)
+    .update(parsed.data)
     .eq("id", needId)
     .select()
     .single();
 
   if (error) {
-    return { error: `Erro ao atualizar necessidade: ${error.message}` };
+    console.error("[updateNeed]", error.message);
+    return { error: "Erro ao atualizar necessidade. Tente novamente." };
   }
 
   return { success: true, need: updated };
@@ -252,12 +320,27 @@ export async function getCities(): Promise<
 
   if (!points) return [];
 
-  const counts: Record<string, { city: string; state: string; count: number; latSum: number; lngSum: number }> = {};
+  const counts: Record<
+    string,
+    {
+      city: string;
+      state: string;
+      count: number;
+      latSum: number;
+      lngSum: number;
+    }
+  > = {};
   for (const p of points) {
     if (!p.city) continue;
     const key = `${p.city}|${p.state}`;
     if (!counts[key]) {
-      counts[key] = { city: p.city, state: p.state ?? "", count: 0, latSum: 0, lngSum: 0 };
+      counts[key] = {
+        city: p.city,
+        state: p.state ?? "",
+        count: 0,
+        latSum: 0,
+        lngSum: 0,
+      };
     }
     counts[key].count++;
     counts[key].latSum += p.latitude;
@@ -275,6 +358,11 @@ export async function getCities(): Promise<
 }
 
 export async function deleteNeed(needId: string) {
+  // Validate UUID
+  if (!uuidSchema.safeParse(needId).success) {
+    return { error: "ID inválido." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -284,16 +372,28 @@ export async function deleteNeed(needId: string) {
     return { error: "Você precisa estar logado." };
   }
 
+  // Rate limit
+  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Muitas requisições. Aguarde um momento." };
+  }
+
   const { error } = await supabase.from("needs").delete().eq("id", needId);
 
   if (error) {
-    return { error: `Erro ao remover necessidade: ${error.message}` };
+    console.error("[deleteNeed]", error.message);
+    return { error: "Erro ao remover necessidade. Tente novamente." };
   }
 
   return { success: true };
 }
 
 export async function deletePoint(pointId: string) {
+  // Validate UUID
+  if (!uuidSchema.safeParse(pointId).success) {
+    return { error: "ID inválido." };
+  }
+
   const supabase = await createClient();
 
   const {
@@ -301,6 +401,12 @@ export async function deletePoint(pointId: string) {
   } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Você precisa estar logado." };
+  }
+
+  // Rate limit
+  const { success: withinLimit } = await mutationRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Muitas requisições. Aguarde um momento." };
   }
 
   // Delete needs first
@@ -309,7 +415,8 @@ export async function deletePoint(pointId: string) {
   const { error } = await supabase.from("points").delete().eq("id", pointId);
 
   if (error) {
-    return { error: `Erro ao remover ponto: ${error.message}` };
+    console.error("[deletePoint]", error.message);
+    return { error: "Erro ao remover ponto. Tente novamente." };
   }
 
   return { success: true };
