@@ -19,12 +19,12 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+} from "@/components/ui/drawer";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -103,122 +103,100 @@ export function PointDetailsSheet({
   const TypeIcon = TYPE_ICON_MAP[point.type] ?? MapPin;
 
   return (
-    <Sheet open={open} onOpenChange={handleClose}>
-      <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
-        {/* Drag handle */}
-        <div className="flex justify-center pt-2 pb-1">
-          <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
-        </div>
-        <SheetHeader>
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-start gap-2.5 min-w-0">
-              <span
-                className="flex items-center justify-center size-9 rounded-lg shrink-0 mt-0.5"
-                style={{ backgroundColor: `${POINT_TYPE_COLORS[point.type]}15` }}
-              >
-                <TypeIcon className="size-5" style={{ color: POINT_TYPE_COLORS[point.type] }} />
-              </span>
-              <div className="min-w-0">
-                <SheetTitle className="text-left">{point.name}</SheetTitle>
-                <SheetDescription>
-                  <span className="flex flex-wrap gap-1 mt-1">
-                    <Badge variant="outline" className="text-xs">
-                      {POINT_TYPE_LABELS[point.type]}
-                    </Badge>
-                    <Badge
-                      variant={priorityVariant[point.priority]}
-                      className="text-xs"
-                    >
-                      {PRIORITY_LABELS[point.priority]}
-                    </Badge>
-                  </span>
-                </SheetDescription>
+    <Drawer open={open} onOpenChange={handleClose}>
+      <DrawerContent>
+        <div className="overflow-y-auto flex-1">
+          <DrawerHeader>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <span
+                  className="flex items-center justify-center size-9 rounded-lg shrink-0 mt-0.5"
+                  style={{ backgroundColor: `${POINT_TYPE_COLORS[point.type]}15` }}
+                >
+                  <TypeIcon className="size-5" style={{ color: POINT_TYPE_COLORS[point.type] }} />
+                </span>
+                <div className="min-w-0">
+                  <DrawerTitle className="text-left">{point.name}</DrawerTitle>
+                  <DrawerDescription asChild>
+                    <span className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs">
+                        {POINT_TYPE_LABELS[point.type]}
+                      </Badge>
+                      <Badge
+                        variant={priorityVariant[point.priority]}
+                        className="text-xs"
+                      >
+                        {PRIORITY_LABELS[point.priority]}
+                      </Badge>
+                    </span>
+                  </DrawerDescription>
+                </div>
               </div>
-            </div>
-            {isOwner && !editMode && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="shrink-0"
-                onClick={() => setEditMode(true)}
-              >
-                <Pencil className="size-3.5 mr-1" />
-                Editar
-              </Button>
-            )}
-            {isOwner && editMode && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="shrink-0"
-                onClick={() => setEditMode(false)}
-              >
-                <X className="size-3.5 mr-1" />
-                Sair
-              </Button>
-            )}
-          </div>
-        </SheetHeader>
-
-        <div className="space-y-4 px-4 pb-4">
-          {editMode ? (
-            <EditPointInfo point={point} onDone={() => setEditMode(false)} />
-          ) : (
-            <PointInfoReadOnly point={point} />
-          )}
-
-          {/* Weather info */}
-          <PointWeatherInfo point={point} />
-
-          {/* Moderation */}
-          {!editMode && <ModerationButtons point={point} />}
-
-          {/* Needs section */}
-          <div className="rounded-lg border bg-muted/30 p-3">
-            <div className="flex items-center gap-1.5 mb-3">
-              <Package className="size-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">Necessidades</span>
-              {point.needs.length > 0 && pendingNeeds.length > 0 && (
-                <span className="text-xs text-orange-600 ml-auto">
-                  {pendingNeeds.length} pendente{pendingNeeds.length !== 1 ? "s" : ""}
-                </span>
+              {isOwner && !editMode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => setEditMode(true)}
+                >
+                  <Pencil className="size-3.5 mr-1" />
+                  Editar
+                </Button>
               )}
-              {point.needs.length > 0 && pendingNeeds.length === 0 && (
-                <span className="text-xs text-green-600 ml-auto">
-                  todas atendidas
-                </span>
+              {isOwner && editMode && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => setEditMode(false)}
+                >
+                  <X className="size-3.5 mr-1" />
+                  Sair
+                </Button>
               )}
             </div>
+          </DrawerHeader>
 
-            {point.needs.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma necessidade cadastrada.
-              </p>
+          <div className="space-y-4 px-4 pb-8">
+            {editMode ? (
+              <EditPointInfo point={point} onDone={() => setEditMode(false)} />
+            ) : (
+              <PointInfoReadOnly point={point} />
             )}
 
-            {/* Pending needs */}
-            {pendingNeeds.length > 0 && (
-              <ul className={editMode ? "space-y-2" : "space-y-1.5"}>
-                {pendingNeeds.map((need) => (
-                  <NeedItem
-                    key={need.id}
-                    need={need}
-                    editMode={editMode}
-                  />
-                ))}
-              </ul>
-            )}
+            {/* Weather info */}
+            <PointWeatherInfo point={point} />
 
-            {/* Fulfilled needs */}
-            {fulfilledNeeds.length > 0 && (
-              <div className={pendingNeeds.length > 0 ? "mt-3 pt-3 border-t" : ""}>
-                {pendingNeeds.length > 0 && (
-                  <p className="text-xs text-muted-foreground mb-1.5">
-                    Atendidas
-                  </p>
+            {/* Moderation */}
+            {!editMode && <ModerationButtons point={point} />}
+
+            {/* Needs section */}
+            <div className="rounded-lg border bg-muted/30 p-3">
+              <div className="flex items-center gap-1.5 mb-3">
+                <Package className="size-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Necessidades</span>
+                {point.needs.length > 0 && pendingNeeds.length > 0 && (
+                  <span className="text-xs text-orange-600 ml-auto">
+                    {pendingNeeds.length} pendente{pendingNeeds.length !== 1 ? "s" : ""}
+                  </span>
                 )}
+                {point.needs.length > 0 && pendingNeeds.length === 0 && (
+                  <span className="text-xs text-green-600 ml-auto">
+                    todas atendidas
+                  </span>
+                )}
+              </div>
+
+              {point.needs.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma necessidade cadastrada.
+                </p>
+              )}
+
+              {/* Pending needs */}
+              {pendingNeeds.length > 0 && (
                 <ul className={editMode ? "space-y-2" : "space-y-1.5"}>
-                  {fulfilledNeeds.map((need) => (
+                  {pendingNeeds.map((need) => (
                     <NeedItem
                       key={need.id}
                       need={need}
@@ -226,25 +204,45 @@ export function PointDetailsSheet({
                     />
                   ))}
                 </ul>
-              </div>
+              )}
+
+              {/* Fulfilled needs */}
+              {fulfilledNeeds.length > 0 && (
+                <div className={pendingNeeds.length > 0 ? "mt-3 pt-3 border-t" : ""}>
+                  {pendingNeeds.length > 0 && (
+                    <p className="text-xs text-muted-foreground mb-1.5">
+                      Atendidas
+                    </p>
+                  )}
+                  <ul className={editMode ? "space-y-2" : "space-y-1.5"}>
+                    {fulfilledNeeds.map((need) => (
+                      <NeedItem
+                        key={need.id}
+                        need={need}
+                        editMode={editMode}
+                      />
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Add need form (edit mode only) */}
+            {editMode && (
+              <AddNeedForm pointId={point.id} />
+            )}
+
+            {/* Delete point (edit mode only) */}
+            {editMode && (
+              <DeletePointButton
+                pointId={point.id}
+                onDeleted={() => handleClose(false)}
+              />
             )}
           </div>
-
-          {/* Add need form (edit mode only) */}
-          {editMode && (
-            <AddNeedForm pointId={point.id} />
-          )}
-
-          {/* Delete point (edit mode only) */}
-          {editMode && (
-            <DeletePointButton
-              pointId={point.id}
-              onDeleted={() => handleClose(false)}
-            />
-          )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
