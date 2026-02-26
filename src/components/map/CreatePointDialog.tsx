@@ -66,8 +66,8 @@ export function CreatePointDialog({
           description: value.description || undefined,
           type: value.type,
           priority: value.priority,
-          latitude: value.latitude!,
-          longitude: value.longitude!,
+          latitude: value.latitude || 0,
+          longitude: value.longitude || 0,
           address: value.address || undefined,
           city: value.city || undefined,
           state: value.state || undefined,
@@ -155,9 +155,13 @@ export function CreatePointDialog({
             name="name"
             validators={{
               onBlur: ({ value }) =>
-                value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
+                value.trim().length < 3
+                  ? "Nome deve ter pelo menos 3 caracteres"
+                  : undefined,
               onSubmit: ({ value }) =>
-                value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
+                value.trim().length < 3
+                  ? "Nome deve ter pelo menos 3 caracteres"
+                  : undefined,
             }}
           >
             {(field) => (
@@ -171,7 +175,9 @@ export function CreatePointDialog({
                   placeholder="Nome do ponto"
                 />
                 {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
+                  <p className="text-sm text-destructive">
+                    {field.state.meta.errors[0]}
+                  </p>
                 )}
               </div>
             )}
@@ -197,13 +203,18 @@ export function CreatePointDialog({
               {(field) => (
                 <div className="space-y-2">
                   <Label>Tipo *</Label>
-                  <Select value={field.state.value} onValueChange={field.handleChange}>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={field.handleChange}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="shelter">Abrigo</SelectItem>
-                      <SelectItem value="collection">Ponto de Coleta</SelectItem>
+                      <SelectItem value="collection">
+                        Ponto de Coleta
+                      </SelectItem>
                       <SelectItem value="distribution">Distribuição</SelectItem>
                     </SelectContent>
                   </Select>
@@ -215,7 +226,10 @@ export function CreatePointDialog({
               {(field) => (
                 <div className="space-y-2">
                   <Label>Prioridade *</Label>
-                  <Select value={field.state.value} onValueChange={field.handleChange}>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={field.handleChange}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -234,7 +248,9 @@ export function CreatePointDialog({
             name="latitude"
             validators={{
               onSubmit: ({ value }) =>
-                value === null ? "Selecione uma localização usando a busca de endereço" : undefined,
+                value === null
+                  ? "Selecione uma localização usando a busca de endereço"
+                  : undefined,
             }}
           >
             {(field) => (
@@ -248,7 +264,8 @@ export function CreatePointDialog({
                   {(values) =>
                     values.latitude && values.longitude ? (
                       <p className="text-xs text-muted-foreground">
-                        Lat: {values.latitude.toFixed(4)}, Lng: {values.longitude.toFixed(4)}
+                        Lat: {values.latitude.toFixed(4)}, Lng:{" "}
+                        {values.longitude.toFixed(4)}
                         {values.city && ` — ${values.city}`}
                         {values.state && `/${values.state}`}
                       </p>
@@ -256,7 +273,9 @@ export function CreatePointDialog({
                   }
                 </form.Subscribe>
                 {field.state.meta.errors.length > 0 && (
-                  <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
+                  <p className="text-sm text-destructive">
+                    {field.state.meta.errors[0]}
+                  </p>
                 )}
               </div>
             )}
@@ -354,7 +373,11 @@ export function CreatePointDialog({
             </div>
           </div>
 
-          <Button type="submit" className="w-full" disabled={createPointMutation.isPending}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={createPointMutation.isPending}
+          >
             {createPointMutation.isPending ? "Salvando..." : "Criar Ponto"}
           </Button>
         </form>
