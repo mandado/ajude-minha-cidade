@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { GeoSearch, type GeoSearchResult } from "./GeoSearch";
 import { useCreatePoint } from "@/hooks/usePointMutations";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, House, Package, Truck, MountainSnow, TriangleAlert } from "lucide-react";
 import type { NeedInput } from "@/lib/validators/point";
 
 interface CreatePointDialogProps {
@@ -60,14 +60,22 @@ export function CreatePointDialog({
       operatingHours: "",
     },
     onSubmit: async ({ value }) => {
+      if (value.latitude === null || value.longitude === null) {
+        toast.error("Selecione uma localização usando a busca de endereço.");
+        return;
+      }
+
+      const lat = value.latitude;
+      const lng = value.longitude;
+
       const result = await createPointMutation.mutateAsync({
         point: {
           name: value.name,
           description: value.description || undefined,
           type: value.type,
           priority: value.priority,
-          latitude: value.latitude || 0,
-          longitude: value.longitude || 0,
+          latitude: lat,
+          longitude: lng,
           address: value.address || undefined,
           city: value.city || undefined,
           state: value.state || undefined,
@@ -211,11 +219,36 @@ export function CreatePointDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="shelter">Abrigo</SelectItem>
-                      <SelectItem value="collection">
-                        Ponto de Coleta
+                      <SelectItem value="shelter">
+                        <span className="flex items-center gap-2">
+                          <House className="size-4 text-blue-500" />
+                          Abrigo
+                        </span>
                       </SelectItem>
-                      <SelectItem value="distribution">Distribuição</SelectItem>
+                      <SelectItem value="collection">
+                        <span className="flex items-center gap-2">
+                          <Package className="size-4 text-green-500" />
+                          Ponto de Coleta
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="distribution">
+                        <span className="flex items-center gap-2">
+                          <Truck className="size-4 text-orange-500" />
+                          Distribuição
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="landslide">
+                        <span className="flex items-center gap-2">
+                          <MountainSnow className="size-4 text-amber-700" />
+                          Deslizamento
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="burial">
+                        <span className="flex items-center gap-2">
+                          <TriangleAlert className="size-4 text-red-600" />
+                          Soterramento
+                        </span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

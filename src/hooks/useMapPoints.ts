@@ -7,7 +7,7 @@ import type { MapPoint, MapFilters } from "@/types/map";
 import type { PointType, PriorityLevel } from "@/types/database";
 import type { Need } from "@/types/database";
 
-const ALL_TYPES: PointType[] = ["shelter", "collection", "distribution"];
+const ALL_TYPES: PointType[] = ["shelter", "collection", "distribution", "landslide", "burial"];
 const ALL_PRIORITIES: PriorityLevel[] = ["high", "medium", "low"];
 
 async function fetchPoints(): Promise<MapPoint[]> {

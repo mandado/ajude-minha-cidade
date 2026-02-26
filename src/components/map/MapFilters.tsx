@@ -11,6 +11,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { House, Package, Truck, MountainSnow, TriangleAlert } from "lucide-react";
 import type { MapFilters as MapFiltersType } from "@/types/map";
 import {
   POINT_TYPE_LABELS,
@@ -19,6 +20,14 @@ import {
 } from "@/types/map";
 import type { PointType, PriorityLevel } from "@/types/database";
 import { getCities } from "@/lib/actions/points";
+
+const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
+  shelter: House,
+  collection: Package,
+  distribution: Truck,
+  landslide: MountainSnow,
+  burial: TriangleAlert,
+};
 
 interface MapFiltersProps {
   filters: MapFiltersType;
@@ -86,27 +95,30 @@ export function FilterContent({
         <h4 className="text-sm font-medium mb-3">Tipo de ponto</h4>
         <div className="flex flex-wrap gap-2">
           {(Object.entries(POINT_TYPE_LABELS) as [PointType, string][]).map(
-            ([type, label]) => (
-              <button
-                key={type}
-                onClick={() => toggleType(type)}
-                className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
-                style={{
-                  backgroundColor: filters.types.includes(type)
-                    ? `${POINT_TYPE_COLORS[type]}20`
-                    : "transparent",
-                  borderColor: filters.types.includes(type)
-                    ? POINT_TYPE_COLORS[type]
-                    : "var(--border)",
-                }}
-              >
-                <span
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: POINT_TYPE_COLORS[type] }}
-                />
-                {label}
-              </button>
-            ),
+            ([type, label]) => {
+              const TypeIcon = TYPE_ICON_MAP[type];
+              return (
+                <button
+                  key={type}
+                  onClick={() => toggleType(type)}
+                  className="flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors"
+                  style={{
+                    backgroundColor: filters.types.includes(type)
+                      ? `${POINT_TYPE_COLORS[type]}20`
+                      : "transparent",
+                    borderColor: filters.types.includes(type)
+                      ? POINT_TYPE_COLORS[type]
+                      : "var(--border)",
+                    color: filters.types.includes(type)
+                      ? POINT_TYPE_COLORS[type]
+                      : "inherit",
+                  }}
+                >
+                  <TypeIcon className="size-3.5 shrink-0" />
+                  {label}
+                </button>
+              );
+            },
           )}
         </div>
       </div>

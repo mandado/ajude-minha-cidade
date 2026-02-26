@@ -1,4 +1,4 @@
-export type PointType = "shelter" | "collection" | "distribution";
+export type PointType = "shelter" | "collection" | "distribution" | "landslide" | "burial";
 export type PointStatus = "active" | "inactive" | "pending";
 export type PriorityLevel = "high" | "medium" | "low";
 export type ModerationAction = "approve" | "reject" | "flag" | "remove";

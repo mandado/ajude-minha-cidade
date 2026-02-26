@@ -3,7 +3,10 @@
 import { Popup } from "react-leaflet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Clock, Package, ChevronRight, CheckCircle } from "lucide-react";
+import {
+  MapPin, Phone, Clock, Package, ChevronRight, CheckCircle,
+  House, Truck, MountainSnow, TriangleAlert,
+} from "lucide-react";
 import type { MapPoint } from "@/types/map";
 import { POINT_TYPE_LABELS, PRIORITY_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { PointType, PriorityLevel } from "@/types/database";
@@ -14,10 +17,12 @@ const PRIORITY_CLASSES: Record<PriorityLevel, string> = {
   low: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
-const TYPE_ICONS: Record<PointType, string> = {
-  shelter: "🏠",
-  collection: "📦",
-  distribution: "🤝",
+const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
+  shelter: House,
+  collection: Package,
+  distribution: Truck,
+  landslide: MountainSnow,
+  burial: TriangleAlert,
 };
 
 interface PointPopupProps {
@@ -28,6 +33,7 @@ interface PointPopupProps {
 export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
   const fulfilledCount = point.needs.filter((n) => n.is_fulfilled).length;
   const pendingCount = point.needs.length - fulfilledCount;
+  const TypeIcon = TYPE_ICON_MAP[point.type];
 
   return (
     <Popup>
@@ -35,10 +41,10 @@ export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
         {/* Header: type icon + name + badges */}
         <div className="flex items-start gap-2">
           <span
-            className="flex items-center justify-center size-8 rounded-lg text-base shrink-0"
+            className="flex items-center justify-center size-8 rounded-lg shrink-0"
             style={{ backgroundColor: `${POINT_TYPE_COLORS[point.type]}15` }}
           >
-            {TYPE_ICONS[point.type]}
+            <TypeIcon className="size-4" style={{ color: POINT_TYPE_COLORS[point.type] }} />
           </span>
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold leading-tight truncate">

@@ -13,6 +13,10 @@ import {
   Clock,
   AlertTriangle,
   Package,
+  House,
+  Truck,
+  MountainSnow,
+  TriangleAlert,
 } from "lucide-react";
 import {
   Sheet,
@@ -21,6 +25,16 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,10 +68,12 @@ const priorityVariant: Record<string, "default" | "secondary" | "outline"> = {
   low: "outline",
 };
 
-const TYPE_ICONS: Record<PointType, string> = {
-  shelter: "🏠",
-  collection: "📦",
-  distribution: "🤝",
+const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
+  shelter: House,
+  collection: Package,
+  distribution: Truck,
+  landslide: MountainSnow,
+  burial: TriangleAlert,
 };
 
 interface PointDetailsSheetProps {
@@ -84,6 +100,7 @@ export function PointDetailsSheet({
 
   const pendingNeeds = point.needs.filter((n) => !n.is_fulfilled);
   const fulfilledNeeds = point.needs.filter((n) => n.is_fulfilled);
+  const TypeIcon = TYPE_ICON_MAP[point.type];
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
@@ -96,10 +113,10 @@ export function PointDetailsSheet({
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2.5 min-w-0">
               <span
-                className="flex items-center justify-center size-9 rounded-lg text-lg shrink-0 mt-0.5"
+                className="flex items-center justify-center size-9 rounded-lg shrink-0 mt-0.5"
                 style={{ backgroundColor: `${POINT_TYPE_COLORS[point.type]}15` }}
               >
-                {TYPE_ICONS[point.type]}
+                <TypeIcon className="size-5" style={{ color: POINT_TYPE_COLORS[point.type] }} />
               </span>
               <div className="min-w-0">
                 <SheetTitle className="text-left">{point.name}</SheetTitle>
@@ -275,6 +292,7 @@ function EditPointInfo({
   point: MapPoint;
   onDone: () => void;
 }) {
+  const [showConfirm, setShowConfirm] = useState(false);
   const updatePointMutation = useUpdatePoint();
 
   const form = useForm({
@@ -379,6 +397,8 @@ function EditPointInfo({
                   <SelectItem value="shelter">Abrigo</SelectItem>
                   <SelectItem value="collection">Ponto de Coleta</SelectItem>
                   <SelectItem value="distribution">Distribuição</SelectItem>
+                  <SelectItem value="landslide">Deslizamento</SelectItem>
+                  <SelectItem value="burial">Soterramento</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -467,12 +487,32 @@ function EditPointInfo({
         </Button>
         <Button
           size="sm"
-          onClick={() => form.handleSubmit()}
+          onClick={() => setShowConfirm(true)}
           disabled={updatePointMutation.isPending}
         >
           {updatePointMutation.isPending ? "Salvando..." : "Salvar"}
         </Button>
       </div>
+
+      <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar alteração</AlertDialogTitle>
+            <AlertDialogDescription>
+              Este é um serviço comunitário. As informações deste ponto são
+              usadas por pessoas em situação de emergência. Dados incorretos
+              podem impactar vidas. Tem certeza de que as informações estão
+              corretas?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Revisar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => form.handleSubmit()}>
+              Confirmar e salvar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
