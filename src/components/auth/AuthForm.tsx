@@ -14,7 +14,6 @@ export function AuthForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,7 +23,6 @@ export function AuthForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSuccess(null);
 
     const supabase = createClient();
 
@@ -72,17 +70,14 @@ export function AuthForm() {
         return;
       }
 
-      setSuccess(
-        "Cadastro realizado! Verifique seu e-mail para confirmar a conta."
-      );
-      setLoading(false);
+      router.push("/");
+      router.refresh();
     }
   };
 
   const toggleMode = () => {
     setMode((m) => (m === "login" ? "register" : "login"));
     setError(null);
-    setSuccess(null);
   };
 
   return (
@@ -132,9 +127,6 @@ export function AuthForm() {
 
         {error && (
           <p className="text-sm text-destructive">{error}</p>
-        )}
-        {success && (
-          <p className="text-sm text-green-600">{success}</p>
         )}
 
         <Button type="submit" className="w-full h-11" disabled={loading}>

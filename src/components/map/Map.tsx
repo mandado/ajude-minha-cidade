@@ -15,7 +15,7 @@ import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
 import { HelpDialog } from "./HelpDialog";
 import { Button } from "@/components/ui/button";
-import { Filter, HelpCircle, Plus, User } from "lucide-react";
+import { Filter, HelpCircle, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
 import "leaflet/dist/leaflet.css";
 import type { Map as LeafletMap } from "leaflet";
@@ -239,13 +239,17 @@ export default function Map() {
               variant="ghost"
               size="sm"
               className="flex flex-col items-center gap-0.5 h-auto py-2 px-3"
-              onClick={() => router.push("/login")}
+              onClick={async () => {
+                const supabase = (await import("@/lib/supabase/client")).createClient();
+                await supabase.auth.signOut();
+                router.refresh();
+              }}
             >
-              <User className="h-5 w-5" />
+              <LogOut className="h-5 w-5" />
               <span className="text-xs truncate max-w-[4rem]">
                 {user.user_metadata?.full_name ||
                   user.email?.split("@")[0] ||
-                  "Perfil"}
+                  "Sair"}
               </span>
             </Button>
           ) : (
