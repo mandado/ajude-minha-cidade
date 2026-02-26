@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/drawer";
 import { House, Package, Truck, MountainSnow, TriangleAlert, Construction, Search, MapPin, Loader2 } from "lucide-react";
 import type { MapFilters as MapFiltersType } from "@/types/map";
-import {
-  POINT_TYPE_LABELS,
-  POINT_TYPE_COLORS,
-} from "@/types/map";
+import { POINT_TYPE_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { PointType } from "@/types/database";
 import { getCities } from "@/lib/actions/points";
 
-const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICON_MAP: Record<
+  PointType,
+  React.ComponentType<{ className?: string }>
+> = {
   shelter: House,
   collection: Package,
   distribution: Truck,
@@ -46,7 +46,6 @@ interface MapFiltersControlledProps extends MapFiltersProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
-
 
 export function FilterContent({
   filters,
@@ -95,15 +94,17 @@ export function FilterContent({
     (g) => !cityCounts.some((c) => normalize(c.city) === normalize(g.city || g.display_name))
   );
 
-  const handleCityClick = (item: { city: string; lat: number; lng: number }) => {
+  const handleCityClick = (item: {
+    city: string;
+    lat: number;
+    lng: number;
+  }) => {
     const isRemoving = cityFilter.includes(item.city);
     onCityToggle(item.city);
 
     if (!isRemoving) {
-      // Adding a city — zoom to it
       onCitySelect?.(item.city, item.lat, item.lng);
     } else {
-      // Removing a city — zoom to the last remaining one
       const remaining = cityFilter.filter((c) => c !== item.city);
       if (remaining.length > 0) {
         const lastCity = remaining[remaining.length - 1];
@@ -118,7 +119,9 @@ export function FilterContent({
   return (
     <div className="space-y-4">
       <div>
-        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Tipo de ponto</h4>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Tipo de ponto
+        </h4>
         <div className="flex flex-col gap-1">
           {(Object.entries(POINT_TYPE_LABELS) as [PointType, string][]).map(
             ([type, label]) => {
@@ -141,7 +144,9 @@ export function FilterContent({
                     className="relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors"
                     style={{ backgroundColor: active ? color : "var(--muted)" }}
                   >
-                    <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${active ? "translate-x-4" : "translate-x-0"}`} />
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${active ? "translate-x-4" : "translate-x-0"}`}
+                    />
                   </span>
                 </button>
               );
@@ -151,64 +156,66 @@ export function FilterContent({
       </div>
 
       <div>
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Cidade</h4>
-          <div className="relative mb-2">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
-            <Input
-              value={citySearch}
-              onChange={(e) => setCitySearch(e.target.value)}
-              placeholder="Buscar cidade..."
-              className="pl-8 h-8 text-sm"
-            />
-            {isGeoLoading && (
-              <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 animate-spin text-muted-foreground" />
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Cidade
+        </h4>
+        <div className="relative mb-2">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            value={citySearch}
+            onChange={(e) => setCitySearch(e.target.value)}
+            placeholder="Buscar cidade..."
+            className="pl-8 h-8 text-sm"
+          />
+          {isGeoLoading && (
+            <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3.5 animate-spin text-muted-foreground" />
+          )}
+        </div>
+        <div className="h-36 overflow-y-auto">
+          <div className="flex flex-wrap gap-1.5 pr-1">
+            {!isGeoLoading && citySearch.trim().length > 0 && filteredCities.length === 0 && geocodedOnly.length === 0 && (
+              <p className="text-xs text-muted-foreground py-1">Nenhuma cidade encontrada.</p>
             )}
-          </div>
-          <div className="h-36 overflow-y-auto">
-            <div className="flex flex-wrap gap-1.5 pr-1">
-              {!isGeoLoading && citySearch.trim().length > 0 && filteredCities.length === 0 && geocodedOnly.length === 0 && (
-                <p className="text-xs text-muted-foreground py-1">Nenhuma cidade encontrada.</p>
-              )}
-              {filteredCities.map((item) => {
-                const isActive = cityFilter.includes(item.city);
-                return (
-                  <button
-                    key={`${item.city}|${item.state}`}
-                    onClick={() => handleCityClick(item)}
-                    className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm transition-colors ${
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "hover:bg-accent"
-                    }`}
-                  >
-                    {item.city}
-                    {item.state && `/${item.state}`}
-                    <Badge
-                      variant={isActive ? "secondary" : "outline"}
-                      className="h-5 px-1.5 text-xs"
-                    >
-                      {item.count}
-                    </Badge>
-                  </button>
-                );
-              })}
-              {geocodedOnly.map((g) => (
+            {filteredCities.map((item) => {
+              const isActive = cityFilter.includes(item.city);
+              return (
                 <button
-                  key={g.id}
-                  onClick={() => {
-                    onCitySelect?.(g.city || g.display_name, g.lat, g.lng);
-                    setCitySearch("");
-                  }}
-                  className="flex items-center gap-1.5 rounded-lg border border-dashed px-2.5 py-1.5 text-sm transition-colors hover:bg-accent text-muted-foreground"
+                  key={`${item.city}|${item.state}`}
+                  onClick={() => handleCityClick(item)}
+                  className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm transition-colors ${
+                    isActive
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "hover:bg-accent"
+                  }`}
                 >
-                  <MapPin className="size-3 shrink-0" />
-                  {g.city || g.display_name}
-                  {g.state && `/${g.state}`}
+                  {item.city}
+                  {item.state && `/${item.state}`}
+                  <Badge
+                    variant={isActive ? "secondary" : "outline"}
+                    className="h-5 px-1.5 text-xs"
+                  >
+                    {item.count}
+                  </Badge>
                 </button>
-              ))}
-            </div>
+              );
+            })}
+            {geocodedOnly.map((g) => (
+              <button
+                key={g.id}
+                onClick={() => {
+                  onCitySelect?.(g.city || g.display_name, g.lat, g.lng);
+                  setCitySearch("");
+                }}
+                className="flex items-center gap-1.5 rounded-lg border border-dashed px-2.5 py-1.5 text-sm transition-colors hover:bg-accent text-muted-foreground"
+              >
+                <MapPin className="size-3 shrink-0" />
+                {g.city || g.display_name}
+                {g.state && `/${g.state}`}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
       <div className="pt-2 border-t space-y-2">
         <button
@@ -216,11 +223,17 @@ export function FilterContent({
           className="w-full flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors"
         >
           <span className="flex items-center gap-2">
-            <Construction className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`} />
+            <Construction
+              className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`}
+            />
             Ruas fechadas
           </span>
-          <span className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}>
-            <span className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`} />
+          <span
+            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`}
+            />
           </span>
         </button>
         <div className="flex items-center justify-between">
@@ -249,13 +262,12 @@ export function MapFilters({
           <DrawerContent>
             <div className="overflow-y-auto flex-1">
               <DrawerHeader>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col items-center gap-3">
                   <Image
                     src="/logo.png"
                     alt="Ajude Minha Cidade"
-                    width={300}
-                    height={130}
-                    className="h-24 w-auto"
+                    width={200}
+                    height={90}
                   />
                   <DrawerTitle>Filtros</DrawerTitle>
                 </div>
@@ -270,7 +282,9 @@ export function MapFilters({
 
       {/* Desktop: Sidebar */}
       <div className="hidden md:block absolute top-4 right-4 z-[1000] w-[272px] bg-background/95 backdrop-blur-sm rounded-xl border shadow-lg p-4">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">Filtros</h3>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          Filtros
+        </h3>
         <FilterContent {...props} />
       </div>
     </>
