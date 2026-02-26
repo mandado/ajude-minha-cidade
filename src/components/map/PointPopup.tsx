@@ -111,8 +111,8 @@ export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
                 )}
               </span>
             </div>
-            <ul className="space-y-0.5 pl-5">
-              {point.needs.slice(0, 5).map((need) => (
+            <ul className="space-y-0.5 pl-5 max-h-[120px] overflow-auto">
+              {point.needs.map((need) => (
                 <li
                   key={need.id}
                   className={`text-xs flex items-center gap-1.5 ${need.is_fulfilled ? "text-muted-foreground line-through" : ""}`}
@@ -128,11 +128,6 @@ export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
                   </span>
                 </li>
               ))}
-              {point.needs.length > 5 && (
-                <li className="text-xs text-muted-foreground">
-                  +{point.needs.length - 5} mais...
-                </li>
-              )}
             </ul>
           </div>
         )}
