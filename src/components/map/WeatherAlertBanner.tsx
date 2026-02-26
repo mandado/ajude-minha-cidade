@@ -106,7 +106,7 @@ export function WeatherAlertBanner({ cityName }: WeatherAlertBannerProps) {
                 )}
                 {alert.instrucoes.length > 0 && (
                   <div>
-                    <p className="font-semibold">Instrucoes:</p>
+                    <p className="font-semibold">Instruções:</p>
                     <ul className="list-disc list-inside">
                       {alert.instrucoes.map((inst, i) => (
                         <li key={i}>{inst}</li>
@@ -116,7 +116,7 @@ export function WeatherAlertBanner({ cityName }: WeatherAlertBannerProps) {
                 )}
                 {alert.inicio && alert.fim && (
                   <p className="text-xs opacity-80">
-                    Vigencia: {alert.inicio} ate {alert.fim}
+                    Válido de {alert.inicio} até {alert.fim}
                   </p>
                 )}
               </div>

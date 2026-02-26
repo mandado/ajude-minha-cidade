@@ -51,23 +51,22 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
               <Filter className="h-4 w-4 text-primary shrink-0" />
-              Filtrar por tipo, prioridade ou cidade
+              Filtrar por tipo ou cidade
             </div>
             <p className="text-muted-foreground pl-6">
               Use os filtros para encontrar abrigos, pontos de coleta ou
-              distribuição. Filtre por prioridade ou selecione uma cidade
-              específica.
+              distribuição. Selecione uma cidade para ver só os locais de lá.
             </p>
           </section>
 
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
               <LogIn className="h-4 w-4 text-primary shrink-0" />
-              Login com Google
+              Entrar com e-mail
             </div>
             <p className="text-muted-foreground pl-6">
               Para cadastrar pontos, confirmar ou denunciar, você precisa estar
-              logado. Basta entrar com sua conta Google.
+              logado. Crie uma conta gratuita com e-mail e senha.
             </p>
           </section>
 
@@ -85,22 +84,25 @@ export function HelpDialog({ open, onOpenChange }: HelpDialogProps) {
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
               <ShieldCheck className="h-4 w-4 text-green-600 shrink-0" />
-              Confirmar um ponto
+              Confirmar um local
             </div>
             <p className="text-muted-foreground pl-6">
-              Visitou o local e ele existe? Clique em "Confirmar" nos detalhes
-              do ponto para ajudar outros a confiar na informação.
+              Esteve no local e ele existe e funciona? Toque em{" "}
+              <strong>"Confirmo que existe"</strong> para ajudar outras pessoas
+              a confiar na informação.
             </p>
           </section>
 
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
               <Flag className="h-4 w-4 text-red-500 shrink-0" />
-              Denunciar um ponto
+              Denunciar um local
             </div>
             <p className="text-muted-foreground pl-6">
-              Informação incorreta ou ponto inexistente? Clique em "Denunciar"
-              e informe o motivo. Isso ajuda a manter o mapa confiável.
+              Informação errada ou local fechado? Toque em{" "}
+              <strong>"Denunciar"</strong> e escreva o motivo (ex:{" "}
+              <em>"Endereço errado"</em>, <em>"Local fechado"</em>). Isso ajuda
+              a manter o mapa correto.
             </p>
           </section>
 

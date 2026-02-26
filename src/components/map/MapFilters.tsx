@@ -152,7 +152,7 @@ export function FilterContent({
       )}
 
       <div>
-        <h4 className="text-sm font-medium mb-3">Camadas</h4>
+        <h4 className="text-sm font-medium mb-3">Mostrar no mapa</h4>
         <button
           onClick={onToggleBlockedStreets}
           className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
@@ -162,7 +162,7 @@ export function FilterContent({
           }`}
         >
           <Construction className="size-3.5 shrink-0" />
-          Ruas interditadas
+          {showBlockedStreets ? "Ocultar ruas bloqueadas" : "Mostrar ruas bloqueadas"}
         </button>
       </div>
 
