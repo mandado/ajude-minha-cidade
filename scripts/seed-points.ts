@@ -79,6 +79,23 @@ const points: SeedPoint[] = [
   { name: "Abrigo - Escola Municipal Amélia Pires", address: "Monte Castelo", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
   { name: "Abrigo - Escola Municipal Murilo Mendes", address: "Rua Dr. Leonel Jaguaribe, 240", neighborhood: "Alto Grajaú", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
   { name: "Abrigo - Escola Municipal Nilo Camilo Ayupe", address: "Rua Almirante Barroso, 155", neighborhood: "Paineiras", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Raymundo Hargreaves", address: "Rua Luiz Favero, 383", neighborhood: "Bom Jardim", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Áurea Bicalho", address: "Rua Odilon Braga, 119", neighborhood: "Linhares", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Marlene Barros", address: "Rua Marumbi, 56", neighborhood: "Marumbi", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Dilermando Cruz", address: "Rua Altivo Halfeld, 44", neighborhood: "Vila Ideal", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Belmira Duarte", address: "Rua Adaílton García, 110", neighborhood: "JK", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Irineu Guimarães", address: "Rua José Zacarias dos Santos, 55", neighborhood: "São Benedito", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Dante Jaime Brochado", address: "Rua Francisco Fontainha, 163", neighborhood: "Santo Antônio", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Gabriel Gonçalves", address: "Rua Gabriel Coimbra, 240", neighborhood: "Ipiranga", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Fernão Dias", address: "Rua Gustavo Fernandes Barbosa, 155", neighborhood: "Bandeirantes", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Adhemar Resende", address: "Av. Sr. dos Passos, 1596", neighborhood: "São Pedro", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Henrique José", address: "Rua Cidade do Sol, 370", neighborhood: "Cidade do Sol", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Paulo Rogério dos Santos", address: "Rua Cel. Quintão, 136", neighborhood: "Monte Castelo", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Paulo Japyassu", address: "Rua São João Batista, 104", neighborhood: "Parque Guarani", city: "Juiz de Fora", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+
+  // ──── ABRIGOS MATIAS BARBOSA ────
+  { name: "E.M. Marieta Miranda Couto", address: "Nossa Senhora da Penha", neighborhood: "Nossa Senhora da Penha", city: "Matias Barbosa", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
+  { name: "E.M. Lucy de Castro Cabral", address: "Centro", neighborhood: "Centro", city: "Matias Barbosa", state: "MG", type: "shelter", priority: "high", description: "Acolhimento de famílias desabrigadas" },
 
   // ──── MINAS GERAIS (outras cidades) ────
   { name: "Ponto de Coleta Barbacena - Grogotó", address: "BR 265, 3480", neighborhood: "Grogotó", city: "Barbacena", state: "MG", type: "collection", priority: "medium" },
