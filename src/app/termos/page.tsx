@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+export const dynamic = "force-static";
+
 export const metadata: Metadata = {
   title: "Termos de Uso — Ajuda Minha Cidade",
   description: "Termos de Uso da plataforma Ajuda Minha Cidade.",
