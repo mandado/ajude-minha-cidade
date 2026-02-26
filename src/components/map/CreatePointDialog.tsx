@@ -291,7 +291,7 @@ export function CreatePointDialog({
                   onSelect={handleGeoSelect}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Digite o endereço, bairro ou cidade e selecione uma das sugestões para definir a localização no mapa. É obrigatório selecionar um resultado da lista.
+                  Para melhores resultados, pesquise por <strong>rua + número + cidade</strong> (ex: "Rua das Flores 123, Porto Alegre") ou pelo <strong>CEP</strong>. Nomes de bairros e pontos de referência conhecidos também funcionam. Selecione um resultado da lista para confirmar.
                 </p>
                 <form.Subscribe selector={(state) => state.values}>
                   {(values) =>
