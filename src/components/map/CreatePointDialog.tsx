@@ -60,11 +60,6 @@ export function CreatePointDialog({
       operatingHours: "",
     },
     onSubmit: async ({ value }) => {
-      if (!value.latitude || !value.longitude) {
-        toast.error("Selecione uma localização usando a busca de endereço.");
-        return;
-      }
-
       const result = await createPointMutation.mutateAsync({
         point: {
           name: value.name,
@@ -159,6 +154,8 @@ export function CreatePointDialog({
           <form.Field
             name="name"
             validators={{
+              onBlur: ({ value }) =>
+                value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
               onSubmit: ({ value }) =>
                 value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
             }}
@@ -233,24 +230,37 @@ export function CreatePointDialog({
             </form.Field>
           </div>
 
-          <div className="space-y-2">
-            <Label>Localização *</Label>
-            <GeoSearch
-              placeholder="Buscar endereço..."
-              onSelect={handleGeoSelect}
-            />
-            <form.Subscribe selector={(state) => state.values}>
-              {(values) =>
-                values.latitude && values.longitude ? (
-                  <p className="text-xs text-muted-foreground">
-                    Lat: {values.latitude.toFixed(4)}, Lng: {values.longitude.toFixed(4)}
-                    {values.city && ` — ${values.city}`}
-                    {values.state && `/${values.state}`}
-                  </p>
-                ) : null
-              }
-            </form.Subscribe>
-          </div>
+          <form.Field
+            name="latitude"
+            validators={{
+              onSubmit: ({ value }) =>
+                value === null ? "Selecione uma localização usando a busca de endereço" : undefined,
+            }}
+          >
+            {(field) => (
+              <div className="space-y-2">
+                <Label>Localização *</Label>
+                <GeoSearch
+                  placeholder="Buscar endereço..."
+                  onSelect={handleGeoSelect}
+                />
+                <form.Subscribe selector={(state) => state.values}>
+                  {(values) =>
+                    values.latitude && values.longitude ? (
+                      <p className="text-xs text-muted-foreground">
+                        Lat: {values.latitude.toFixed(4)}, Lng: {values.longitude.toFixed(4)}
+                        {values.city && ` — ${values.city}`}
+                        {values.state && `/${values.state}`}
+                      </p>
+                    ) : null
+                  }
+                </form.Subscribe>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
+                )}
+              </div>
+            )}
+          </form.Field>
 
           <div className="grid grid-cols-2 gap-4">
             <form.Field name="phone">

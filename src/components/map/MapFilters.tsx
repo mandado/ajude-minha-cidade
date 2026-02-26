@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -200,7 +201,16 @@ export function MapFilters({
               <div className="h-1.5 w-12 rounded-full bg-muted-foreground/30" />
             </div>
             <SheetHeader>
-              <SheetTitle>Filtros</SheetTitle>
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/logo.png"
+                  alt="Ajude Minha Cidade"
+                  width={300}
+                  height={130}
+                  className="h-24 w-auto"
+                />
+                <SheetTitle>Filtros</SheetTitle>
+              </div>
             </SheetHeader>
             <div className="px-4 pb-4">
               <FilterContent {...props} />

@@ -327,16 +327,27 @@ function EditPointInfo({
 
   return (
     <div className="space-y-4 rounded-md border p-3">
-      <form.Field name="name">
+      <form.Field
+        name="name"
+        validators={{
+          onBlur: ({ value }) =>
+            value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
+          onSubmit: ({ value }) =>
+            value.trim().length < 3 ? "Nome deve ter pelo menos 3 caracteres" : undefined,
+        }}
+      >
         {(field) => (
           <div className="space-y-2">
             <Label>Nome *</Label>
             <Input
               value={field.state.value}
               onChange={(e) => field.handleChange(e.target.value)}
+              onBlur={field.handleBlur}
               placeholder="Nome do ponto"
-              minLength={3}
             />
+            {field.state.meta.errors.length > 0 && (
+              <p className="text-sm text-destructive">{field.state.meta.errors[0]}</p>
+            )}
           </div>
         )}
       </form.Field>
