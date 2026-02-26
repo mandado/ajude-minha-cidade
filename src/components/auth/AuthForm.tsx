@@ -119,7 +119,7 @@ export function AuthForm() {
             <Input
               id="fullName"
               type="text"
-              placeholder="Seu nome"
+              placeholder="Como você se chama?"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
@@ -181,13 +181,13 @@ export function AuthForm() {
       <div className="text-center text-sm text-muted-foreground">
         {mode === "login" ? (
           <>
-            Não tem conta?{" "}
+            Ainda não faz parte?{" "}
             <button
               type="button"
               onClick={toggleMode}
               className="underline hover:text-foreground transition-colors"
             >
-              Cadastre-se
+              Crie sua conta
             </button>
           </>
         ) : (
