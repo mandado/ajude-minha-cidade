@@ -17,7 +17,7 @@ const PRIORITY_CLASSES: Record<PriorityLevel, string> = {
   low: "bg-gray-100 text-gray-600 border-gray-200",
 };
 
-const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICON_MAP: Record<PointType, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   shelter: House,
   collection: Package,
   distribution: Truck,
