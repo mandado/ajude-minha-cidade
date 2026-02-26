@@ -33,7 +33,7 @@ interface PointPopupProps {
 export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
   const fulfilledCount = point.needs.filter((n) => n.is_fulfilled).length;
   const pendingCount = point.needs.length - fulfilledCount;
-  const TypeIcon = TYPE_ICON_MAP[point.type];
+  const TypeIcon = TYPE_ICON_MAP[point.type] ?? MapPin;
 
   return (
     <Popup>

@@ -100,7 +100,7 @@ export function PointDetailsSheet({
 
   const pendingNeeds = point.needs.filter((n) => !n.is_fulfilled);
   const fulfilledNeeds = point.needs.filter((n) => n.is_fulfilled);
-  const TypeIcon = TYPE_ICON_MAP[point.type];
+  const TypeIcon = TYPE_ICON_MAP[point.type] ?? MapPin;
 
   return (
     <Sheet open={open} onOpenChange={handleClose}>
