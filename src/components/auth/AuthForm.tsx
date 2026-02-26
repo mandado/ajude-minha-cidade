@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
+import { useState } from "react";
+import { Turnstile } from "next-turnstile";
 import { createClient } from "@/lib/supabase/client";
 import { verifyCaptcha } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
@@ -16,22 +16,26 @@ const IS_DEV = process.env.NODE_ENV === "development";
 
 export function AuthForm() {
   const router = useRouter();
-  const turnstileRef = useRef<TurnstileInstance>(null);
   const [mode, setMode] = useState<Mode>("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState<string | undefined>();
+  const [turnstileKey, setTurnstileKey] = useState(0);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+
+  const resetCaptcha = () => {
+    setCaptchaToken(undefined);
+    setTurnstileKey((k) => k + 1);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    // Verificar captcha via server action (pula em dev)
     if (!IS_DEV) {
       if (!captchaToken) {
         setError("Complete o captcha antes de continuar.");
@@ -40,8 +44,7 @@ export function AuthForm() {
       }
       const valid = await verifyCaptcha(captchaToken);
       if (!valid) {
-        turnstileRef.current?.reset();
-        setCaptchaToken(undefined);
+        resetCaptcha();
         setError("Verificação de captcha falhou. Tente novamente.");
         setLoading(false);
         return;
@@ -57,8 +60,7 @@ export function AuthForm() {
       });
 
       if (error) {
-        turnstileRef.current?.reset();
-        setCaptchaToken(undefined);
+        resetCaptcha();
         setError(
           error.message === "Invalid login credentials"
             ? "E-mail ou senha incorretos."
@@ -87,8 +89,7 @@ export function AuthForm() {
       });
 
       if (error) {
-        turnstileRef.current?.reset();
-        setCaptchaToken(undefined);
+        resetCaptcha();
         setError(
           error.message === "User already registered"
             ? "Este e-mail já está cadastrado. Faça login."
@@ -106,8 +107,7 @@ export function AuthForm() {
   const toggleMode = () => {
     setMode((m) => (m === "login" ? "register" : "login"));
     setError(null);
-    turnstileRef.current?.reset();
-    setCaptchaToken(undefined);
+    resetCaptcha();
   };
 
   return (
@@ -157,15 +157,15 @@ export function AuthForm() {
           />
         </div>
 
-        {!IS_DEV && (
-          <Turnstile
-            ref={turnstileRef}
-            siteKey={SITE_KEY}
-            onSuccess={(token) => setCaptchaToken(token)}
-            onExpire={() => setCaptchaToken(undefined)}
-            options={{ theme: "auto", language: "pt-BR" }}
-          />
-        )}
+        <Turnstile
+          key={turnstileKey}
+          siteKey={SITE_KEY}
+          sandbox={IS_DEV}
+          onVerify={(token) => setCaptchaToken(token)}
+          onExpire={() => setCaptchaToken(undefined)}
+          onError={() => setCaptchaToken(undefined)}
+          theme="auto"
+        />
 
         {error && <p className="text-sm text-destructive">{error}</p>}
 
