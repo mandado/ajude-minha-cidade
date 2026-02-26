@@ -290,12 +290,14 @@ export function CreatePointDialog({
                   placeholder="Buscar endereço..."
                   onSelect={handleGeoSelect}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Digite o endereço, bairro ou cidade e selecione uma das sugestões para definir a localização no mapa. É obrigatório selecionar um resultado da lista.
+                </p>
                 <form.Subscribe selector={(state) => state.values}>
                   {(values) =>
                     values.latitude && values.longitude ? (
-                      <p className="text-xs text-muted-foreground">
-                        Lat: {values.latitude.toFixed(4)}, Lng:{" "}
-                        {values.longitude.toFixed(4)}
+                      <p className="text-xs text-green-600 font-medium flex items-center gap-1">
+                        ✓ Localização definida
                         {values.city && ` — ${values.city}`}
                         {values.state && `/${values.state}`}
                       </p>
@@ -343,7 +345,12 @@ export function CreatePointDialog({
 
           {/* Needs section */}
           <div className="space-y-3">
-            <Label>Necessidades</Label>
+            <div>
+              <Label>Necessidades</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Informe o que o local precisa. Quantidade e unidade são opcionais — você pode cadastrar só a descrição.
+              </p>
+            </div>
 
             {needs.length > 0 && (
               <ul className="space-y-1">
@@ -356,6 +363,8 @@ export function CreatePointDialog({
                       {need.description}
                       {need.quantity && need.unit
                         ? ` (${need.quantity} ${need.unit})`
+                        : need.quantity
+                        ? ` (${need.quantity})`
                         : ""}
                     </span>
                     <button
@@ -374,21 +383,21 @@ export function CreatePointDialog({
               <Input
                 value={newNeedDesc}
                 onChange={(e) => setNewNeedDesc(e.target.value)}
-                placeholder="Descrição da necessidade"
+                placeholder="Ex: Alimentos não perecíveis, cobertores..."
                 className="w-full"
               />
               <div className="flex gap-2">
                 <Input
                   value={newNeedQty}
                   onChange={(e) => setNewNeedQty(e.target.value)}
-                  placeholder="Qtd"
+                  placeholder="Qtd (opcional)"
                   type="number"
-                  className="w-20"
+                  className="w-28"
                 />
                 <Input
                   value={newNeedUnit}
                   onChange={(e) => setNewNeedUnit(e.target.value)}
-                  placeholder="Unidade"
+                  placeholder="Unidade (opcional)"
                   className="flex-1"
                 />
                 <Button
