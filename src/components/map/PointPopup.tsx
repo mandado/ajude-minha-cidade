@@ -3,7 +3,7 @@
 import { Popup } from "react-leaflet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Phone, Clock, Package, ChevronRight } from "lucide-react";
+import { MapPin, Phone, Clock, Package, ChevronRight, CheckCircle } from "lucide-react";
 import type { MapPoint } from "@/types/map";
 import { POINT_TYPE_LABELS, PRIORITY_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { PointType, PriorityLevel } from "@/types/database";
@@ -60,6 +60,12 @@ export function PointPopup({ point, onOpenDetails }: PointPopupProps) {
               >
                 {PRIORITY_LABELS[point.priority]}
               </Badge>
+              {point.confirmations_count >= 3 && (
+                <Badge className="text-[10px] px-1.5 py-0 h-4 border font-medium bg-green-100 text-green-700 border-green-200">
+                  <CheckCircle className="size-2.5 mr-0.5" />
+                  Verificado
+                </Badge>
+              )}
             </div>
           </div>
         </div>

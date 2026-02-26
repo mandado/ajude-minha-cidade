@@ -23,10 +23,21 @@ async function fetchPoints(): Promise<MapPoint[]> {
 
   const pointIds = points.map((p) => p.id);
 
-  const { data: needs, error: needsError } = await supabase
-    .from("needs")
-    .select("*")
-    .in("point_id", pointIds);
+  const [
+    { data: needs, error: needsError },
+    { data: confirmations },
+    { data: reports },
+  ] = await Promise.all([
+    supabase.from("needs").select("*").in("point_id", pointIds),
+    supabase
+      .from("point_confirmations")
+      .select("point_id")
+      .in("point_id", pointIds),
+    supabase
+      .from("point_reports")
+      .select("point_id")
+      .in("point_id", pointIds),
+  ]);
 
   if (needsError) throw needsError;
 
@@ -39,10 +50,37 @@ async function fetchPoints(): Promise<MapPoint[]> {
     {},
   );
 
-  return points.map((point) => ({
-    ...point,
-    needs: needsByPoint[point.id] ?? [],
-  }));
+  const confirmCounts: Record<string, number> = {};
+  for (const c of confirmations ?? []) {
+    confirmCounts[c.point_id] = (confirmCounts[c.point_id] ?? 0) + 1;
+  }
+
+  const reportCounts: Record<string, number> = {};
+  for (const r of reports ?? []) {
+    reportCounts[r.point_id] = (reportCounts[r.point_id] ?? 0) + 1;
+  }
+
+  const sevenDaysAgo = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
+  return points
+    .map((point) => ({
+      ...point,
+      needs: needsByPoint[point.id] ?? [],
+      confirmations_count: confirmCounts[point.id] ?? 0,
+      reports_count: reportCounts[point.id] ?? 0,
+    }))
+    .filter((point) => {
+      // Seed points (no created_by) never expire
+      if (!point.created_by) return true;
+      // Points with at least 1 confirmation never expire
+      if (point.confirmations_count > 0) return true;
+      // Points created within last 7 days are visible
+      if (point.created_at > sevenDaysAgo) return true;
+      // Old unconfirmed points are hidden
+      return false;
+    });
 }
 
 export function useMapPoints() {

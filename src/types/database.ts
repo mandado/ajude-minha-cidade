@@ -51,3 +51,18 @@ export interface ModerationLog {
   reason: string | null;
   created_at: string;
 }
+
+export interface PointReport {
+  id: string;
+  point_id: string;
+  user_id: string;
+  reason: string;
+  created_at: string;
+}
+
+export interface PointConfirmation {
+  id: string;
+  point_id: string;
+  user_id: string;
+  created_at: string;
+}

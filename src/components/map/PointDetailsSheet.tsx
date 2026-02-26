@@ -44,6 +44,7 @@ import {
 import type { MapPoint } from "@/types/map";
 import { POINT_TYPE_LABELS, PRIORITY_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { Need, PointType, PriorityLevel } from "@/types/database";
+import { ModerationButtons } from "./ModerationButtons";
 import { useLocationWeather, useINMETAlerts } from "@/hooks/useWeather";
 import { getWeatherInfo } from "@/types/weather";
 
@@ -151,6 +152,9 @@ export function PointDetailsSheet({
 
           {/* Weather info */}
           <PointWeatherInfo point={point} />
+
+          {/* Moderation */}
+          {!editMode && <ModerationButtons point={point} />}
 
           {/* Needs section */}
           <div className="rounded-lg border bg-muted/30 p-3">

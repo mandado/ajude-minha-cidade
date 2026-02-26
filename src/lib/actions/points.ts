@@ -1,8 +1,17 @@
 "use server";
 
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import { createPointSchema, needSchema } from "@/lib/validators/point";
 import type { NeedInput } from "@/lib/validators/point";
+
+const redis = Redis.fromEnv();
+const createPointRateLimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(3, "1 d"),
+  prefix: "create-point",
+});
 
 interface CreatePointData {
   point: {
@@ -31,6 +40,12 @@ export async function createPoint(data: CreatePointData) {
   } = await supabase.auth.getUser();
   if (!user) {
     return { error: "Você precisa estar logado para criar um ponto." };
+  }
+
+  // Rate limit: 3 points per day per user
+  const { success: withinLimit } = await createPointRateLimit.limit(user.id);
+  if (!withinLimit) {
+    return { error: "Limite diário atingido. Você pode criar até 3 pontos por dia." };
   }
 
   // Validate point data

@@ -2,6 +2,8 @@ import type { Point, Need, PointType, PriorityLevel } from "./database";
 
 export interface MapPoint extends Point {
   needs: Need[];
+  confirmations_count: number;
+  reports_count: number;
 }
 
 export interface MapFilters {
