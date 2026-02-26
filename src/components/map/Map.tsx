@@ -14,6 +14,7 @@ import { UserMenu } from "@/components/auth/UserMenu";
 import { useMapPoints } from "@/hooks/useMapPoints";
 import { useAuth } from "@/hooks/useAuth";
 import { HelpDialog } from "./HelpDialog";
+import { BlockedStreetOverlay } from "./BlockedStreetOverlay";
 import { Button } from "@/components/ui/button";
 import { Filter, HelpCircle, LogOut, Plus, User } from "lucide-react";
 import Link from "next/link";
@@ -121,6 +122,7 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <FlyToHandler mapRef={mapRef} onViewChange={handleViewChange} />
+        <BlockedStreetOverlay />
         {points.map((point) => (
           <PointMarker
             key={point.id}

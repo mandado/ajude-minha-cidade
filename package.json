@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "cross-env PORT=3002 next dev",
     "seed": "dotenv -e .env -- tsx scripts/seed-points.ts",
+    "geocode:blocked": "tsx scripts/geocode-blocked.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
