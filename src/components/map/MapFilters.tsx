@@ -236,13 +236,10 @@ export function FilterContent({
             />
           </span>
         </button>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <span className="text-sm text-muted-foreground">
             {filteredCount} de {totalCount} pontos
           </span>
-          <Button variant="outline" size="sm" onClick={resetFilters}>
-            Limpar filtros
-          </Button>
         </div>
       </div>
     </div>
@@ -254,13 +251,19 @@ export function MapFilters({
   onOpenChange,
   ...props
 }: MapFiltersControlledProps) {
+  const totalTypes = Object.keys(POINT_TYPE_LABELS).length;
+  const hasActiveFilters =
+    props.filters.types.length < totalTypes ||
+    props.cityFilter.length > 0 ||
+    props.showBlockedStreets;
+
   return (
     <>
       {/* Mobile: Controlled sheet (triggered from bottom bar) */}
       <div className="md:hidden">
         <Drawer open={open} onOpenChange={onOpenChange}>
-          <DrawerContent>
-            <div className="overflow-y-auto flex-1">
+          <DrawerContent className="flex flex-col max-h-[85vh]">
+            <div className="overflow-y-auto flex-1 min-h-0">
               <DrawerHeader>
                 <div className="flex flex-col items-center gap-3">
                   <Image
@@ -272,20 +275,40 @@ export function MapFilters({
                   <DrawerTitle>Filtros</DrawerTitle>
                 </div>
               </DrawerHeader>
-              <div className="px-4 pb-8">
+              <div className="px-4 pb-4">
                 <FilterContent {...props} />
               </div>
+            </div>
+            <div className="px-4 pb-6 pt-3 border-t bg-background shrink-0 flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={props.resetFilters} disabled={!hasActiveFilters}>
+                Limpar
+              </Button>
+              <Button className="flex-1" onClick={() => onOpenChange?.(false)}>
+                Aplicar filtros
+              </Button>
             </div>
           </DrawerContent>
         </Drawer>
       </div>
 
       {/* Desktop: Sidebar */}
-      <div className="hidden md:block absolute top-4 right-4 z-[1000] w-[272px] bg-background/95 backdrop-blur-sm rounded-xl border shadow-lg p-4">
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-4">
-          Filtros
-        </h3>
-        <FilterContent {...props} />
+      <div className="hidden md:flex flex-col absolute top-4 right-4 z-[1000] w-[272px] max-h-[calc(100vh-2rem)] bg-background/95 backdrop-blur-sm rounded-xl border shadow-lg">
+        <div className="px-4 pt-4 pb-2 shrink-0">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Filtros
+          </h3>
+        </div>
+        <div className="overflow-y-auto flex-1 min-h-0 px-4 pb-2">
+          <FilterContent {...props} />
+        </div>
+        <div className="px-4 pb-4 pt-3 border-t bg-background/95 rounded-b-xl shrink-0 flex gap-2">
+          <Button variant="outline" className="flex-1" onClick={props.resetFilters}>
+            Limpar
+          </Button>
+          <Button className="flex-1" onClick={() => {}}>
+            Aplicar filtros
+          </Button>
+        </div>
       </div>
     </>
   );
