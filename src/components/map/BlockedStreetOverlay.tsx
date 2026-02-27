@@ -161,22 +161,25 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                   }}
                 >
                   <Tooltip sticky>{s.name}{s.fromNumber && s.toNumber ? ` · nº ${s.fromNumber}–${s.toNumber}` : ""}</Tooltip>
-                  <Popup>
-                    <StreetPopup
-                      id={s.id}
-                      name={s.name}
-                      neighborhood={s.neighborhood}
-                      city={s.city}
-                      description={s.description}
-                      fromNumber={s.fromNumber}
-                      toNumber={s.toNumber}
-                      user={user}
-                      onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
-                    />
-                  </Popup>
                 </Polyline>
               </Fragment>
             ))}
+            {/* Pin no início do trecho para o usuário poder clicar e abrir o balão */}
+            <Marker position={s.paths[0][0]} icon={banIcon}>
+              <Popup>
+                <StreetPopup
+                  id={s.id}
+                  name={s.name}
+                  neighborhood={s.neighborhood}
+                  city={s.city}
+                  description={s.description}
+                  fromNumber={s.fromNumber}
+                  toNumber={s.toNumber}
+                  user={user}
+                  onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
+                />
+              </Popup>
+            </Marker>
           </Fragment>
         ) : (
           <Marker key={i} position={[s.lat, s.lng]} icon={banIcon}>
