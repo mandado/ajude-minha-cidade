@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { toast } from "sonner";
 import {
@@ -29,12 +29,16 @@ interface CreatePointDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onPointCreated?: (lat: number, lng: number) => void;
+  creatingLocation?: { lat: number; lng: number } | null;
+  onCreatingLocationChange?: (loc: { lat: number; lng: number }) => void;
 }
 
 export function CreatePointDialog({
   open,
   onOpenChange,
   onPointCreated,
+  creatingLocation,
+  onCreatingLocationChange,
 }: CreatePointDialogProps) {
   const createPointMutation = useCreatePoint();
 
@@ -60,7 +64,7 @@ export function CreatePointDialog({
     },
     onSubmit: async ({ value }) => {
       if (value.latitude === null || value.longitude === null) {
-        toast.error("Selecione uma localização usando a busca de endereço.");
+        toast.error("Clique no mapa para posicionar o pin ou busque um endereço.");
         return;
       }
 
@@ -95,6 +99,13 @@ export function CreatePointDialog({
     },
   });
 
+  // Sync pin position (from map click or drag) into form fields
+  useEffect(() => {
+    if (!creatingLocation) return;
+    form.setFieldValue("latitude", creatingLocation.lat);
+    form.setFieldValue("longitude", creatingLocation.lng);
+  }, [creatingLocation, form]);
+
   const handleGeoSelect = (result: GeoSearchResult) => {
     form.setFieldValue("latitude", result.latitude);
     form.setFieldValue("longitude", result.longitude);
@@ -102,6 +113,7 @@ export function CreatePointDialog({
     form.setFieldValue("city", result.city);
     form.setFieldValue("state", result.state);
     form.setFieldValue("neighborhood", result.neighborhood);
+    onCreatingLocationChange?.({ lat: result.latitude, lng: result.longitude });
     onPointCreated?.(result.latitude, result.longitude);
   };
 
@@ -254,13 +266,16 @@ export function CreatePointDialog({
             validators={{
               onSubmit: ({ value }) =>
                 value === null
-                  ? "Selecione uma localização usando a busca de endereço"
+                  ? "Clique no mapa para posicionar o pin ou busque um endereço"
                   : undefined,
             }}
           >
             {(field) => (
               <div className="space-y-2">
                 <Label>Localização *</Label>
+                <p className="text-xs font-medium text-primary">
+                  Clique no mapa para posicionar o pin, ou arraste-o para ajustar. Você também pode buscar pelo endereço abaixo.
+                </p>
                 <GeoSearch
                   placeholder="Buscar endereço..."
                   onSelect={handleGeoSelect}

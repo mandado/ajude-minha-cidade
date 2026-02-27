@@ -33,9 +33,6 @@ export async function createPoint(data: CreatePointData) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado para criar um ponto." };
-  }
 
   // Validate point data
   const pointResult = createPointSchema.safeParse(data.point);
@@ -57,7 +54,7 @@ export async function createPoint(data: CreatePointData) {
   const { data: newPoint, error: pointError } = await supabase
     .from("points")
     .insert({
-      created_by: user.id,
+      created_by: user?.id ?? null,
       name: pointData.name,
       description: pointData.description || null,
       type: pointData.type,

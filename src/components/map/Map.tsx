@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
-import { MapContainer, TileLayer, useMap, useMapEvent } from "react-leaflet";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { MapContainer, TileLayer, useMap, useMapEvent, Marker } from "react-leaflet";
+import L from "leaflet";
 import { useRouter } from "next/navigation";
 import { PointMarker } from "./PointMarker";
 import { MapFilters } from "./MapFilters";
@@ -58,6 +59,58 @@ function FlyToHandler({
   return null;
 }
 
+function MapClickHandler({
+  active,
+  onLocationSet,
+}: {
+  active: boolean;
+  onLocationSet: (lat: number, lng: number) => void;
+}) {
+  useMapEvent("click", (e) => {
+    if (active) {
+      onLocationSet(e.latlng.lat, e.latlng.lng);
+    }
+  });
+  return null;
+}
+
+function DraggableCreationMarker({
+  position,
+  onPositionChange,
+}: {
+  position: { lat: number; lng: number };
+  onPositionChange: (lat: number, lng: number) => void;
+}) {
+  const icon = useMemo(() => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 36" width="28" height="42">
+      <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 24 12 24s12-15 12-24C24 5.4 18.6 0 12 0z" fill="#6366f1" stroke="#fff" stroke-width="1.5"/>
+      <circle cx="12" cy="11" r="6" fill="#fff"/>
+      <circle cx="12" cy="11" r="3" fill="#6366f1"/>
+    </svg>`;
+    return L.divIcon({
+      html: svg,
+      className: "",
+      iconSize: [28, 42],
+      iconAnchor: [14, 42],
+      popupAnchor: [0, -42],
+    });
+  }, []);
+
+  return (
+    <Marker
+      position={[position.lat, position.lng]}
+      icon={icon}
+      draggable={true}
+      eventHandlers={{
+        dragend: (e) => {
+          const pos = (e.target as L.Marker).getLatLng();
+          onPositionChange(pos.lat, pos.lng);
+        },
+      }}
+    />
+  );
+}
+
 export default function Map() {
   const mapRef = useRef<LeafletMap | null>(null);
   const { user } = useAuth();
@@ -83,6 +136,8 @@ export default function Map() {
   const [showBlockedStreets, setShowBlockedStreets] = useState(true);
   const [addBlockedStreetOpen, setAddBlockedStreetOpen] = useState(false);
   const [contributeOpen, setContributeOpen] = useState(false);
+
+  const [creatingLocation, setCreatingLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>({
     lat: BRAZIL_CENTER.lat,
@@ -121,6 +176,11 @@ export default function Map() {
     mapRef.current?.flyTo([lat, lng], 14, { duration: 1.5 });
   }, []);
 
+  // Reset pin when dialog closes
+  useEffect(() => {
+    if (!createOpen) setCreatingLocation(null);
+  }, [createOpen]);
+
   // Keep selectedPoint in sync with refreshed data
   const currentSelectedPoint = selectedPoint
     ? (points.find((p) => p.id === selectedPoint.id) ?? selectedPoint)
@@ -142,7 +202,14 @@ export default function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <FlyToHandler mapRef={mapRef} onViewChange={handleViewChange} />
+        <MapClickHandler active={createOpen} onLocationSet={(lat, lng) => setCreatingLocation({ lat, lng })} />
         <BlockedStreetOverlay show={showBlockedStreets} />
+        {createOpen && creatingLocation && (
+          <DraggableCreationMarker
+            position={creatingLocation}
+            onPositionChange={(lat, lng) => setCreatingLocation({ lat, lng })}
+          />
+        )}
         {points.map((point) => (
           <PointMarker
             key={point.id}
@@ -194,24 +261,22 @@ export default function Map() {
         )}
 
         {/* Ações de contribuição */}
-        {user && (
-          <div className="py-1 border-b">
-            <button
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
-              onClick={() => setCreateOpen(true)}
-            >
-              <MapPin className="size-4 text-primary shrink-0" />
-              Novo ponto no mapa
-            </button>
-            <button
-              className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors text-left"
-              onClick={() => setAddBlockedStreetOpen(true)}
-            >
-              <Construction className="size-4 shrink-0" />
-              Reportar rua fechada
-            </button>
-          </div>
-        )}
+        <div className="py-1 border-b">
+          <button
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+            onClick={() => setCreateOpen(true)}
+          >
+            <MapPin className="size-4 text-primary shrink-0" />
+            Novo ponto no mapa
+          </button>
+          <button
+            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors text-left"
+            onClick={() => setAddBlockedStreetOpen(true)}
+          >
+            <Construction className="size-4 shrink-0" />
+            Reportar rua fechada
+          </button>
+        </div>
 
         {/* Suporte */}
         <div className="py-1">
@@ -267,6 +332,8 @@ export default function Map() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onPointCreated={handlePointCreatedFlyTo}
+        creatingLocation={creatingLocation}
+        onCreatingLocationChange={setCreatingLocation}
       />
 
       {/* Add blocked street dialog */}
@@ -299,24 +366,14 @@ export default function Map() {
             )}
           </button>
 
-          {/* Contribuir / Entrar */}
-          {user ? (
-            <button
-              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg bg-primary mx-1"
-              onClick={() => setContributeOpen(true)}
-            >
-              <MapPin className="h-6 w-6 text-primary-foreground" />
-              <span className="text-[11px] text-primary-foreground font-semibold">Contribuir</span>
-            </button>
-          ) : (
-            <button
-              className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg bg-primary mx-1"
-              onClick={() => router.push("/login")}
-            >
-              <User className="h-6 w-6 text-primary-foreground" />
-              <span className="text-[11px] text-primary-foreground font-semibold">Entrar</span>
-            </button>
-          )}
+          {/* Contribuir */}
+          <button
+            className="flex flex-col items-center gap-1 py-2 px-1 rounded-lg bg-primary mx-1"
+            onClick={() => setContributeOpen(true)}
+          >
+            <MapPin className="h-6 w-6 text-primary-foreground" />
+            <span className="text-[11px] text-primary-foreground font-semibold">Contribuir</span>
+          </button>
 
           {/* Ajuda */}
           <button

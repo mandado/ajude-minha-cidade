@@ -63,23 +63,25 @@ export function HelpDialog({ open, onOpenChange, onFeedback }: HelpDialogProps) 
 
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
-              <LogIn className="h-4 w-4 text-primary shrink-0" />
-              Entrar com e-mail
+              <Plus className="h-4 w-4 text-primary shrink-0" />
+              Cadastrar um ponto
             </div>
             <p className="text-muted-foreground pl-6">
-              Para cadastrar pontos, confirmar ou denunciar, você precisa estar
-              logado. Crie uma conta gratuita com e-mail e senha.
+              Clique em <strong>"Contribuir"</strong> e escolha "Novo ponto no
+              mapa". Toque no mapa para posicionar o pin — você pode arrastá-lo
+              para ajustar — ou busque pelo endereço. Não é necessário criar
+              conta.
             </p>
           </section>
 
           <section className="space-y-1.5">
             <div className="flex items-center gap-2 font-medium">
-              <Plus className="h-4 w-4 text-primary shrink-0" />
-              Cadastrar um ponto
+              <LogIn className="h-4 w-4 text-primary shrink-0" />
+              Entrar com e-mail (opcional)
             </div>
             <p className="text-muted-foreground pl-6">
-              Clique em "Novo Ponto", preencha nome, tipo, endereço e as
-              necessidades do local. Limite de 3 pontos por dia.
+              Criar uma conta gratuita permite confirmar, denunciar e gerenciar
+              os pontos que você cadastrou.
             </p>
           </section>
 
