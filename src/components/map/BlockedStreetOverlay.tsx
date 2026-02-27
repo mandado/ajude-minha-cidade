@@ -220,6 +220,8 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                 description: editTarget.description,
                 fromNumber: editTarget.from_number,
                 toNumber: editTarget.to_number,
+                lat: editTarget.lat,
+                lng: editTarget.lng,
               }
             : null
         }

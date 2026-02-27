@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Construction, Loader2, Hash } from "lucide-react";
+import { Construction, MapPin, Loader2, Hash } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { GeoSearch, type GeoSearchResult } from "./GeoSearch";
 import { useUpdateBlockedStreet } from "@/hooks/useBlockedStreets";
 
 interface EditBlockedStreetDialogProps {
@@ -24,6 +25,8 @@ interface EditBlockedStreetDialogProps {
     description: string;
     fromNumber?: string | null;
     toNumber?: string | null;
+    lat: number;
+    lng: number;
   } | null;
   onUpdated?: () => void;
 }
@@ -38,6 +41,7 @@ export function EditBlockedStreetDialog({
   const [description, setDescription] = useState("");
   const [fromNumber, setFromNumber] = useState("");
   const [toNumber, setToNumber] = useState("");
+  const [location, setLocation] = useState<GeoSearchResult | null>(null);
   const [error, setError] = useState("");
 
   const mutation = useUpdateBlockedStreet();
@@ -49,6 +53,7 @@ export function EditBlockedStreetDialog({
       setDescription(street.description);
       setFromNumber(street.fromNumber ?? "");
       setToNumber(street.toNumber ?? "");
+      setLocation(null);
       setError("");
     }
   }, [street]);
@@ -56,6 +61,15 @@ export function EditBlockedStreetDialog({
   const handleClose = (value: boolean) => {
     if (!value) setError("");
     onOpenChange(value);
+  };
+
+  const handleGeoSelect = (result: GeoSearchResult) => {
+    setLocation(result);
+    setError("");
+    // Pré-preenche nome se o usuário ainda não editou
+    if (!name.trim() || name === street?.name) {
+      setName(result.street || result.displayName.split(",")[0]?.trim() || name);
+    }
   };
 
   const handleSubmit = async () => {
@@ -76,6 +90,14 @@ export function EditBlockedStreetDialog({
       description: description.trim(),
       fromNumber: fromNumber.trim() || undefined,
       toNumber: toNumber.trim() || undefined,
+      // Passa novo local só se o usuário selecionou um
+      ...(location && {
+        lat: location.latitude,
+        lng: location.longitude,
+        neighborhood: location.neighborhood ?? "",
+        city: location.city ?? "",
+        state: location.state ?? "",
+      }),
     });
 
     if ("error" in result) {
@@ -86,6 +108,12 @@ export function EditBlockedStreetDialog({
     handleClose(false);
     onUpdated?.();
   };
+
+  const proximity = location
+    ? { lat: location.latitude, lng: location.longitude }
+    : street
+      ? { lat: street.lat, lng: street.lng }
+      : undefined;
 
   return (
     <Drawer open={open} onOpenChange={handleClose}>
@@ -106,6 +134,27 @@ export function EditBlockedStreetDialog({
           </DrawerHeader>
 
           <div className="space-y-4 px-4 pb-8">
+            {/* Busca de endereço (opcional — só preencher para alterar o local) */}
+            <div className="space-y-2">
+              <Label>
+                Novo endereço
+                <span className="text-xs font-normal text-muted-foreground ml-1">(opcional — preencha para alterar o local)</span>
+              </Label>
+              <GeoSearch
+                placeholder="Buscar rua, bairro ou ponto de referência..."
+                onSelect={handleGeoSelect}
+                proximity={proximity}
+              />
+              {location && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <MapPin className="size-3 shrink-0" />
+                  {location.city}
+                  {location.state && `/${location.state}`}
+                  {location.neighborhood && ` — ${location.neighborhood}`}
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label>
                 Nome da rua <span className="text-destructive">*</span>
@@ -157,6 +206,12 @@ export function EditBlockedStreetDialog({
             </div>
 
             {error && <p className="text-sm text-destructive">{error}</p>}
+
+            {location && (
+              <div className="rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-800">
+                O traçado da rua no mapa será atualizado com base no novo endereço.
+              </div>
+            )}
 
             <div className="flex gap-2 pt-2">
               <Button

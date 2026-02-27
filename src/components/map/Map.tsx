@@ -17,7 +17,6 @@ import { HelpDialog } from "./HelpDialog";
 import { FeedbackDialog } from "./FeedbackDialog";
 import { BlockedStreetOverlay } from "./BlockedStreetOverlay";
 import { AddBlockedStreetDialog } from "./AddBlockedStreetDialog";
-import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -190,7 +189,7 @@ export default function Map() {
     ? (points.find((p) => p.id === selectedPoint.id) ?? selectedPoint)
     : null;
 
-  const canEdit = !!user;
+  const canEdit = true;
   const hasActiveFilters = points.length !== totalPoints;
 
   return (

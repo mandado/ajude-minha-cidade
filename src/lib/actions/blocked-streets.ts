@@ -126,19 +126,55 @@ export async function updateBlockedStreet(input: {
   description: string;
   fromNumber?: string;
   toNumber?: string;
+  /** Se fornecido, re-busca as coordenadas e geometria real da via */
+  lat?: number;
+  lng?: number;
+  neighborhood?: string;
+  city?: string;
+  state?: string;
 }): Promise<{ success: true } | { error: string }> {
   const supabase = await createClient();
 
   if (!input.name.trim()) return { error: "Nome da rua é obrigatório." };
 
+  const locationChanged = input.lat !== undefined && input.lng !== undefined;
+
+  // Re-busca geometria se o local foi alterado
+  let paths: [number, number][][] | null | undefined = undefined;
+  if (locationChanged) {
+    paths = await fetchStreetPaths(input.name.trim(), input.lat!, input.lng!);
+
+    const hasRange = input.fromNumber?.trim() && input.toNumber?.trim();
+    if (paths && hasRange && input.city) {
+      const [fromCoord, toCoord] = await Promise.all([
+        geocodeAddress(input.name.trim(), input.fromNumber!.trim(), input.city.trim(), input.lat!, input.lng!),
+        geocodeAddress(input.name.trim(), input.toNumber!.trim(), input.city.trim(), input.lat!, input.lng!),
+      ]);
+      if (fromCoord && toCoord) {
+        paths = clipPathBetween(paths, fromCoord, toCoord);
+      }
+    }
+  }
+
+  const updatePayload: Record<string, unknown> = {
+    name: input.name.trim(),
+    description: input.description.trim(),
+    from_number: input.fromNumber?.trim() || null,
+    to_number: input.toNumber?.trim() || null,
+  };
+
+  if (locationChanged) {
+    updatePayload.lat = input.lat;
+    updatePayload.lng = input.lng;
+    updatePayload.paths = paths ?? null;
+    if (input.neighborhood !== undefined) updatePayload.neighborhood = input.neighborhood;
+    if (input.city !== undefined) updatePayload.city = input.city;
+    if (input.state !== undefined) updatePayload.state = input.state || null;
+  }
+
   const { error } = await supabase
     .from("blocked_streets")
-    .update({
-      name: input.name.trim(),
-      description: input.description.trim(),
-      from_number: input.fromNumber?.trim() || null,
-      to_number: input.toNumber?.trim() || null,
-    })
+    .update(updatePayload)
     .eq("id", input.id);
 
   if (error) {

@@ -122,14 +122,6 @@ export async function updatePoint(
 
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado." };
-  }
-
-
   // Sanitize: convert null to undefined for Zod validation
   const sanitized = Object.fromEntries(
     Object.entries(data).map(([k, v]) => [k, v === null ? undefined : v]),
@@ -184,14 +176,6 @@ export async function addNeed(
 
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado." };
-  }
-
-
   const needResult = needSchema.safeParse(need);
   if (!needResult.success) {
     return { error: needResult.error.issues[0].message };
@@ -231,14 +215,6 @@ export async function updateNeed(
   }
 
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado." };
-  }
-
 
   // Validate with Zod
   const parsed = updateNeedSchema.safeParse(data);
@@ -319,14 +295,6 @@ export async function deleteNeed(needId: string) {
 
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado." };
-  }
-
-
   const { error } = await supabase.from("needs").delete().eq("id", needId);
 
   if (error) {
@@ -344,14 +312,6 @@ export async function deletePoint(pointId: string) {
   }
 
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { error: "Você precisa estar logado." };
-  }
-
 
   // Delete needs first
   await supabase.from("needs").delete().eq("point_id", pointId);
