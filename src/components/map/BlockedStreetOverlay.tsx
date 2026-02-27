@@ -25,6 +25,8 @@ function StreetPopup({
   neighborhood,
   city,
   description,
+  fromNumber,
+  toNumber,
   user,
   onRequestDelete,
 }: {
@@ -33,6 +35,8 @@ function StreetPopup({
   neighborhood: string;
   city: string;
   description: string;
+  fromNumber?: string | null;
+  toNumber?: string | null;
   user: User | null;
   onRequestDelete: (id: string, name: string) => void;
 }) {
@@ -40,6 +44,11 @@ function StreetPopup({
     <div className="text-sm space-y-1 min-w-[180px]">
       <p className="font-semibold text-red-600">🚧 Rua Interditada</p>
       <p className="font-medium">{name}</p>
+      {fromNumber && toNumber && (
+        <p className="text-xs font-medium text-red-700 bg-red-50 rounded px-1.5 py-0.5 inline-block">
+          Nº {fromNumber} ao {toNumber}
+        </p>
+      )}
       {neighborhood && (
         <p className="text-muted-foreground text-xs">
           {neighborhood} · {city}
@@ -102,12 +111,20 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
       neighborhood: s.neighborhood,
       city: s.city,
       description: s.description,
+      fromNumber: s.from_number,
+      toNumber: s.to_number,
       lat: s.lat,
       lng: s.lng,
       paths: s.paths,
     }));
     return [
-      ...BLOCKED_STREETS.map((s) => ({ ...s, id: undefined, createdBy: undefined })),
+      ...BLOCKED_STREETS.map((s) => ({
+        ...s,
+        id: undefined,
+        createdBy: undefined,
+        fromNumber: undefined,
+        toNumber: undefined,
+      })),
       ...fromDb,
     ];
   }, [dbStreets]);
@@ -121,28 +138,29 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
           <Fragment key={i}>
             {s.paths.map((segment: [number, number][], j: number) => (
               <Fragment key={j}>
+                {/* Sombra escura para contraste */}
                 <Polyline
                   positions={segment}
                   pathOptions={{
                     color: "#7f1d1d",
-                    weight: 11,
-                    opacity: 0.5,
+                    weight: 13,
+                    opacity: 0.45,
                     lineCap: "round",
                     lineJoin: "round",
                   }}
                 />
+                {/* Linha sólida vermelha principal */}
                 <Polyline
                   positions={segment}
                   pathOptions={{
                     color: "#ef4444",
-                    weight: 7,
-                    opacity: 0.95,
-                    dashArray: "14, 8",
+                    weight: 8,
+                    opacity: 0.92,
                     lineCap: "round",
                     lineJoin: "round",
                   }}
                 >
-                  <Tooltip sticky>{s.name}</Tooltip>
+                  <Tooltip sticky>{s.name}{s.fromNumber && s.toNumber ? ` · nº ${s.fromNumber}–${s.toNumber}` : ""}</Tooltip>
                   <Popup>
                     <StreetPopup
                       id={s.id}
@@ -150,6 +168,8 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                       neighborhood={s.neighborhood}
                       city={s.city}
                       description={s.description}
+                      fromNumber={s.fromNumber}
+                      toNumber={s.toNumber}
                       user={user}
                       onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
                     />
@@ -167,6 +187,8 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                 neighborhood={s.neighborhood}
                 city={s.city}
                 description={s.description}
+                fromNumber={s.fromNumber}
+                toNumber={s.toNumber}
                 user={user}
                 onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
               />

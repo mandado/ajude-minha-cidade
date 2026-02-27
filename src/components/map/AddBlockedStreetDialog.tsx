@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Construction, MapPin, Loader2 } from "lucide-react";
+import { Construction, MapPin, Loader2, Hash } from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -32,6 +32,8 @@ export function AddBlockedStreetDialog({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState<GeoSearchResult | null>(null);
+  const [fromNumber, setFromNumber] = useState("");
+  const [toNumber, setToNumber] = useState("");
   const [error, setError] = useState("");
 
   const mutation = useCreateBlockedStreet();
@@ -41,6 +43,8 @@ export function AddBlockedStreetDialog({
       setName("");
       setDescription("");
       setLocation(null);
+      setFromNumber("");
+      setToNumber("");
       setError("");
     }
     onOpenChange(value);
@@ -63,6 +67,10 @@ export function AddBlockedStreetDialog({
       setError("Selecione a localização da rua no campo de busca.");
       return;
     }
+    if ((fromNumber.trim() && !toNumber.trim()) || (!fromNumber.trim() && toNumber.trim())) {
+      setError("Informe o número inicial e final do trecho, ou deixe ambos em branco.");
+      return;
+    }
 
     const result = await mutation.mutateAsync({
       name: name.trim(),
@@ -72,6 +80,8 @@ export function AddBlockedStreetDialog({
       description: description.trim(),
       lat: location.latitude,
       lng: location.longitude,
+      fromNumber: fromNumber.trim() || undefined,
+      toNumber: toNumber.trim() || undefined,
     });
 
     if ("error" in result) {
@@ -82,6 +92,8 @@ export function AddBlockedStreetDialog({
     handleClose(false);
     onCreated?.();
   };
+
+  const hasRange = fromNumber.trim() || toNumber.trim();
 
   return (
     <Drawer open={open} onOpenChange={handleClose}>
@@ -130,6 +142,41 @@ export function AddBlockedStreetDialog({
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Ex: Rua das Flores, Av. Brasil, BR-040..."
               />
+            </div>
+
+            {/* Trecho por número */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5">
+                <Hash className="size-3.5 text-muted-foreground" />
+                Trecho bloqueado
+                <span className="text-xs font-normal text-muted-foreground">(opcional)</span>
+              </Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1">
+                  <Input
+                    value={fromNumber}
+                    onChange={(e) => setFromNumber(e.target.value)}
+                    placeholder="Do nº"
+                    type="text"
+                    inputMode="numeric"
+                  />
+                </div>
+                <span className="text-sm text-muted-foreground shrink-0">até</span>
+                <div className="flex-1">
+                  <Input
+                    value={toNumber}
+                    onChange={(e) => setToNumber(e.target.value)}
+                    placeholder="Ao nº"
+                    type="text"
+                    inputMode="numeric"
+                  />
+                </div>
+              </div>
+              {hasRange && (
+                <p className="text-xs text-muted-foreground">
+                  Apenas o trecho entre os números {fromNumber} e {toNumber} será marcado no mapa.
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">

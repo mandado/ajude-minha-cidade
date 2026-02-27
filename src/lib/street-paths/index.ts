@@ -102,6 +102,51 @@ async function fetchWithMapbox(lat: number, lng: number): Promise<Paths | null> 
   }
 }
 
+// ── Clip de trecho ────────────────────────────────────────────────────────────
+
+function distSq(a: [number, number], b: [number, number]): number {
+  return (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2;
+}
+
+/**
+ * Recorta um conjunto de segmentos de rua entre os dois pontos mais próximos
+ * de `from` e `to`. Retorna apenas o trecho entre eles.
+ */
+export function clipPathBetween(
+  paths: Paths,
+  from: [number, number],
+  to: [number, number],
+): Paths {
+  let bestPath: [number, number][] | null = null;
+  let bestFromIdx = 0;
+  let bestToIdx = 0;
+  let bestScore = Infinity;
+
+  for (const path of paths) {
+    let minFrom = Infinity, fi = 0;
+    let minTo = Infinity, ti = 0;
+    for (let i = 0; i < path.length; i++) {
+      const df = distSq(path[i], from);
+      const dt = distSq(path[i], to);
+      if (df < minFrom) { minFrom = df; fi = i; }
+      if (dt < minTo) { minTo = dt; ti = i; }
+    }
+    const score = minFrom + minTo;
+    if (score < bestScore) {
+      bestScore = score;
+      bestPath = path;
+      bestFromIdx = fi;
+      bestToIdx = ti;
+    }
+  }
+
+  if (!bestPath || bestFromIdx === bestToIdx) return paths;
+
+  const start = Math.min(bestFromIdx, bestToIdx);
+  const end = Math.max(bestFromIdx, bestToIdx);
+  return [bestPath.slice(start, end + 1)];
+}
+
 // ── Interface pública ─────────────────────────────────────────────────────────
 
 export async function fetchStreetPaths(

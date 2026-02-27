@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { fetchStreetPaths } from "@/lib/street-paths";
+import { fetchStreetPaths, clipPathBetween } from "@/lib/street-paths";
 
 export interface BlockedStreetRow {
   id: string;
@@ -13,10 +13,40 @@ export interface BlockedStreetRow {
   lat: number;
   lng: number;
   paths: [number, number][][] | null;
+  from_number: string | null;
+  to_number: string | null;
   created_by: string | null;
   created_at: string;
 }
 
+async function geocodeAddress(
+  street: string,
+  number: string,
+  city: string,
+  lat: number,
+  lng: number,
+): Promise<[number, number] | null> {
+  const token = process.env.MAPBOX_ACCESS_TOKEN;
+  if (!token) return null;
+
+  const q = `${street}, ${number}, ${city}`;
+  const url =
+    `https://api.mapbox.com/search/geocode/v6/forward` +
+    `?q=${encodeURIComponent(q)}` +
+    `&access_token=${token}` +
+    `&country=br&language=pt-BR&limit=1` +
+    `&proximity=${lng},${lat}`;
+
+  try {
+    const res = await fetch(url, { next: { revalidate: 0 } });
+    const data = await res.json();
+    const feat = data.features?.[0];
+    if (!feat) return null;
+    return [feat.geometry.coordinates[1], feat.geometry.coordinates[0]];
+  } catch {
+    return null;
+  }
+}
 
 export async function getBlockedStreets(): Promise<BlockedStreetRow[]> {
   const supabase = await createClient();
@@ -41,6 +71,8 @@ export async function createBlockedStreet(input: {
   description: string;
   lat: number;
   lng: number;
+  fromNumber?: string;
+  toNumber?: string;
 }): Promise<{ success: true; id: string } | { error: string }> {
   const supabase = await createClient();
 
@@ -52,8 +84,20 @@ export async function createBlockedStreet(input: {
   if (!input.name.trim()) return { error: "Nome da rua é obrigatório." };
   if (!input.city.trim()) return { error: "Cidade é obrigatória." };
 
-  // Tenta buscar a geometria real via Overpass
-  const paths = await fetchStreetPaths(input.name.trim(), input.lat, input.lng);
+  // Busca a geometria real via Overpass / Mapbox
+  let paths = await fetchStreetPaths(input.name.trim(), input.lat, input.lng);
+
+  // Recorta o trecho com base nos números informados
+  const hasRange = input.fromNumber?.trim() && input.toNumber?.trim();
+  if (paths && hasRange) {
+    const [fromCoord, toCoord] = await Promise.all([
+      geocodeAddress(input.name.trim(), input.fromNumber!.trim(), input.city.trim(), input.lat, input.lng),
+      geocodeAddress(input.name.trim(), input.toNumber!.trim(), input.city.trim(), input.lat, input.lng),
+    ]);
+    if (fromCoord && toCoord) {
+      paths = clipPathBetween(paths, fromCoord, toCoord);
+    }
+  }
 
   const { data, error } = await supabase
     .from("blocked_streets")
@@ -67,6 +111,8 @@ export async function createBlockedStreet(input: {
       lat: input.lat,
       lng: input.lng,
       paths: paths ?? null,
+      from_number: input.fromNumber?.trim() || null,
+      to_number: input.toNumber?.trim() || null,
     })
     .select("id")
     .single();
