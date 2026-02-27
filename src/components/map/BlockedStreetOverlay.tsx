@@ -1,12 +1,12 @@
 "use client";
 
 import { Fragment, useMemo, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { Marker, Polyline, Popup, Tooltip } from "react-leaflet";
 import { divIcon } from "leaflet";
 import { BLOCKED_STREETS } from "@/data/blocked-streets";
 import { useBlockedStreets, useDeleteBlockedStreet } from "@/hooks/useBlockedStreets";
-import { useAuth } from "@/hooks/useAuth";
+import { EditBlockedStreetDialog } from "./EditBlockedStreetDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { User } from "@supabase/supabase-js";
 
 function StreetPopup({
   id,
@@ -27,7 +26,7 @@ function StreetPopup({
   description,
   fromNumber,
   toNumber,
-  user,
+  onRequestEdit,
   onRequestDelete,
 }: {
   id?: string;
@@ -37,7 +36,7 @@ function StreetPopup({
   description: string;
   fromNumber?: string | null;
   toNumber?: string | null;
-  user: User | null;
+  onRequestEdit: (id: string) => void;
   onRequestDelete: (id: string, name: string) => void;
 }) {
   return (
@@ -59,13 +58,21 @@ function StreetPopup({
         Fonte: Defesa Civil
       </p>
 
-      {!!id && !!user && (
-        <div className="pt-2 border-t">
+      {!!id && (
+        <div className="pt-2 border-t flex gap-3">
           <button
-            className="text-xs text-red-600 hover:text-red-700 hover:underline"
+            className="text-xs text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
+            onClick={() => onRequestEdit(id)}
+          >
+            <Pencil className="size-3" />
+            Editar
+          </button>
+          <button
+            className="text-xs text-red-600 hover:text-red-700 hover:underline flex items-center gap-1"
             onClick={() => onRequestDelete(id, name)}
           >
-            Remover rua fechada
+            <Trash2 className="size-3" />
+            Remover
           </button>
         </div>
       )}
@@ -98,15 +105,16 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
     [],
   );
 
-  const { user } = useAuth();
   const deleteMutation = useDeleteBlockedStreet();
   const { data: dbStreets = [] } = useBlockedStreets();
+
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [editTargetId, setEditTargetId] = useState<string | null>(null);
 
   const allStreets = useMemo(() => {
     const fromDb = dbStreets.map((s) => ({
       id: s.id,
-      createdBy: s.created_by,
       name: s.name,
       neighborhood: s.neighborhood,
       city: s.city,
@@ -121,13 +129,16 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
       ...BLOCKED_STREETS.map((s) => ({
         ...s,
         id: undefined,
-        createdBy: undefined,
         fromNumber: undefined,
         toNumber: undefined,
       })),
       ...fromDb,
     ];
   }, [dbStreets]);
+
+  const editTarget = editTargetId
+    ? dbStreets.find((s) => s.id === editTargetId) ?? null
+    : null;
 
   if (!show || allStreets.length === 0) return null;
 
@@ -138,7 +149,6 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
           <Fragment key={i}>
             {s.paths.map((segment: [number, number][], j: number) => (
               <Fragment key={j}>
-                {/* Sombra escura para contraste */}
                 <Polyline
                   positions={segment}
                   pathOptions={{
@@ -149,7 +159,6 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                     lineJoin: "round",
                   }}
                 />
-                {/* Linha sólida vermelha principal */}
                 <Polyline
                   positions={segment}
                   pathOptions={{
@@ -164,7 +173,6 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                 </Polyline>
               </Fragment>
             ))}
-            {/* Pin no início do trecho para o usuário poder clicar e abrir o balão */}
             <Marker position={s.paths[0][0]} icon={banIcon}>
               <Popup>
                 <StreetPopup
@@ -175,8 +183,8 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                   description={s.description}
                   fromNumber={s.fromNumber}
                   toNumber={s.toNumber}
-                  user={user}
-                  onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
+                  onRequestEdit={(id) => setEditTargetId(id)}
+                  onRequestDelete={(id, name) => { setDeleteError(""); setDeleteTarget({ id, name }); }}
                 />
               </Popup>
             </Marker>
@@ -192,17 +200,35 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
                 description={s.description}
                 fromNumber={s.fromNumber}
                 toNumber={s.toNumber}
-                user={user}
-                onRequestDelete={(id, name) => setDeleteTarget({ id, name })}
+                onRequestEdit={(id) => setEditTargetId(id)}
+                onRequestDelete={(id, name) => { setDeleteError(""); setDeleteTarget({ id, name }); }}
               />
             </Popup>
           </Marker>
         ),
       )}
 
+      {/* Dialog de edição */}
+      <EditBlockedStreetDialog
+        open={!!editTargetId}
+        onOpenChange={(v) => { if (!v) setEditTargetId(null); }}
+        street={
+          editTarget
+            ? {
+                id: editTarget.id,
+                name: editTarget.name,
+                description: editTarget.description,
+                fromNumber: editTarget.from_number,
+                toNumber: editTarget.to_number,
+              }
+            : null
+        }
+      />
+
+      {/* Confirmação de remoção */}
       <AlertDialog
         open={!!deleteTarget}
-        onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}
+        onOpenChange={(v) => { if (!v) { setDeleteTarget(null); setDeleteError(""); } }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -224,6 +250,9 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
               será removida do mapa para todos os usuários. Essa ação não pode
               ser desfeita.
             </AlertDialogDescription>
+            {deleteError && (
+              <p className="text-sm text-destructive pt-1">{deleteError}</p>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleteMutation.isPending}>
@@ -233,11 +262,19 @@ export function BlockedStreetOverlay({ show = true }: BlockedStreetOverlayProps)
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={deleteMutation.isPending}
               onClick={() => {
-                if (deleteTarget) {
-                  deleteMutation.mutate(deleteTarget.id, {
-                    onSuccess: () => setDeleteTarget(null),
-                  });
-                }
+                if (!deleteTarget) return;
+                deleteMutation.mutate(deleteTarget.id, {
+                  onSuccess: (result) => {
+                    if ("error" in result) {
+                      setDeleteError(result.error);
+                    } else {
+                      setDeleteTarget(null);
+                    }
+                  },
+                  onError: () => {
+                    setDeleteError("Erro ao remover. Tente novamente.");
+                  },
+                });
               }}
             >
               {deleteMutation.isPending ? "Removendo..." : "Sim, remover"}

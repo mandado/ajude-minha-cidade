@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getBlockedStreets,
   createBlockedStreet,
+  updateBlockedStreet,
   deleteBlockedStreet,
 } from "@/lib/actions/blocked-streets";
 
@@ -17,6 +18,16 @@ export function useCreateBlockedStreet() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createBlockedStreet,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blocked-streets"] });
+    },
+  });
+}
+
+export function useUpdateBlockedStreet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateBlockedStreet,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blocked-streets"] });
     },

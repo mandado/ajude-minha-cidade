@@ -4,17 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
-
-interface GeocodeResult {
-  id: string;
-  display_name: string;
-  lat: number;
-  lng: number;
-  city: string;
-  state: string;
-  neighborhood: string;
-  street: string;
-}
+import type { GeocodeResult, GeocodeError } from "@/app/api/geocode/route";
 
 export interface GeoSearchResult {
   displayName: string;
@@ -31,6 +21,8 @@ interface GeoSearchProps {
   onSelect: (result: GeoSearchResult) => void;
   className?: string;
   proximity?: { lat: number; lng: number };
+  /** Filtra resultados pela localidade (cidade) esperada */
+  locality?: string;
 }
 
 export function GeoSearch({
@@ -38,6 +30,7 @@ export function GeoSearch({
   onSelect,
   className,
   proximity,
+  locality,
 }: GeoSearchProps) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -50,13 +43,20 @@ export function GeoSearch({
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data: results = [], isLoading } = useQuery({
-    queryKey: ["geocode", "address", debouncedQuery, proximity],
+  const { data: results = [], isLoading } = useQuery<GeocodeResult[]>({
+    queryKey: ["geocode", "address", debouncedQuery, proximity, locality],
     queryFn: async () => {
       const params = new URLSearchParams({ q: debouncedQuery, type: "address" });
       if (proximity) params.set("proximity", `${proximity.lng},${proximity.lat}`);
+      if (locality) params.set("locality", locality);
+
       const res = await fetch(`/api/geocode?${params.toString()}`);
-      return res.json() as Promise<GeocodeResult[]>;
+      const data: GeocodeResult[] | GeocodeError = await res.json();
+
+      // Erro estruturado ou resposta não-array → lista vazia (sem quebrar a UI)
+      if (!Array.isArray(data)) return [];
+
+      return data;
     },
     enabled: debouncedQuery.length >= 3,
   });

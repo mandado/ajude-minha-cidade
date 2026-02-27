@@ -76,11 +76,6 @@ export async function createBlockedStreet(input: {
 }): Promise<{ success: true; id: string } | { error: string }> {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Você precisa estar logado." };
-
   if (!input.name.trim()) return { error: "Nome da rua é obrigatório." };
   if (!input.city.trim()) return { error: "Cidade é obrigatória." };
 
@@ -102,7 +97,7 @@ export async function createBlockedStreet(input: {
   const { data, error } = await supabase
     .from("blocked_streets")
     .insert({
-      created_by: user.id,
+      created_by: null,
       name: input.name.trim(),
       neighborhood: input.neighborhood.trim(),
       city: input.city.trim(),
@@ -125,15 +120,39 @@ export async function createBlockedStreet(input: {
   return { success: true, id: data.id };
 }
 
+export async function updateBlockedStreet(input: {
+  id: string;
+  name: string;
+  description: string;
+  fromNumber?: string;
+  toNumber?: string;
+}): Promise<{ success: true } | { error: string }> {
+  const supabase = await createClient();
+
+  if (!input.name.trim()) return { error: "Nome da rua é obrigatório." };
+
+  const { error } = await supabase
+    .from("blocked_streets")
+    .update({
+      name: input.name.trim(),
+      description: input.description.trim(),
+      from_number: input.fromNumber?.trim() || null,
+      to_number: input.toNumber?.trim() || null,
+    })
+    .eq("id", input.id);
+
+  if (error) {
+    console.error("[updateBlockedStreet]", error);
+    return { error: "Erro ao salvar. Tente novamente." };
+  }
+
+  return { success: true };
+}
+
 export async function deleteBlockedStreet(
   id: string,
 ): Promise<{ success: true } | { error: string }> {
   const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { error: "Você precisa estar logado." };
 
   const { error } = await supabase
     .from("blocked_streets")

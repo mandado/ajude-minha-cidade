@@ -6,6 +6,7 @@
     "dev": "cross-env PORT=3002 next dev",
     "seed": "dotenv -e .env -- tsx scripts/seed-points.ts",
     "geocode:blocked": "tsx scripts/geocode-blocked.ts",
+    "update:blocked": "dotenv -e .env -- tsx scripts/update-db-blocked-streets.ts",
     "seed:disasters": "tsx scripts/seed-disasters.ts",
     "build": "next build",
     "start": "next start",

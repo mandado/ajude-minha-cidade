@@ -17,6 +17,8 @@ import type { MapFilters as MapFiltersType } from "@/types/map";
 import { POINT_TYPE_LABELS, POINT_TYPE_COLORS } from "@/types/map";
 import type { PointType } from "@/types/database";
 import { getCities } from "@/lib/actions/points";
+import { useBlockedStreets } from "@/hooks/useBlockedStreets";
+import { BLOCKED_STREETS } from "@/data/blocked-streets";
 
 const TYPE_ICON_MAP: Record<
   PointType,
@@ -72,6 +74,9 @@ export function FilterContent({
     queryFn: () => getCities(),
     staleTime: 60_000,
   });
+
+  const { data: dbBlockedStreets = [] } = useBlockedStreets();
+  const blockedStreetsCount = BLOCKED_STREETS.length + dbBlockedStreets.length;
 
   const normalize = (s: string) =>
     s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -227,6 +232,9 @@ export function FilterContent({
               className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`}
             />
             Ruas fechadas
+            <Badge variant="outline" className="h-5 px-1.5 text-xs">
+              {blockedStreetsCount}
+            </Badge>
           </span>
           <span
             className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}

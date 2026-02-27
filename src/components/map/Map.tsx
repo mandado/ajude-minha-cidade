@@ -154,8 +154,12 @@ export default function Map() {
 
   const handleViewChange = useCallback(
     (lat: number, lng: number, zoom: number) => {
-      setMapCenter({ lat, lng });
-      setMapZoom(zoom);
+      setMapCenter((prev) => {
+        // Evita criar novo objeto (e re-render) se o centro não mudou
+        if (prev.lat === lat && prev.lng === lng) return prev;
+        return { lat, lng };
+      });
+      setMapZoom((prev) => (prev === zoom ? prev : zoom));
     },
     [],
   );
