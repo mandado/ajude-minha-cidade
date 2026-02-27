@@ -123,6 +123,8 @@ export default function Map() {
     isLoading,
     cityFilter,
     toggleCity,
+    nameFilter,
+    setNameFilter,
   } = useMapPoints();
 
   const [isMobile, setIsMobile] = useState(false);
@@ -326,6 +328,8 @@ export default function Map() {
         onCitySelect={handleCityFilterSelect}
         showBlockedStreets={showBlockedStreets}
         onToggleBlockedStreets={() => setShowBlockedStreets((v) => !v)}
+        nameFilter={nameFilter}
+        onNameFilterChange={setNameFilter}
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
       />

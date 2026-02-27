@@ -42,6 +42,8 @@ interface MapFiltersProps {
   onCitySelect?: (city: string, lat: number, lng: number) => void;
   showBlockedStreets: boolean;
   onToggleBlockedStreets: () => void;
+  nameFilter: string;
+  onNameFilterChange: (value: string) => void;
 }
 
 interface MapFiltersControlledProps extends MapFiltersProps {
@@ -60,6 +62,8 @@ export function FilterContent({
   onCitySelect,
   showBlockedStreets,
   onToggleBlockedStreets,
+  nameFilter,
+  onNameFilterChange,
 }: MapFiltersProps) {
   const [citySearch, setCitySearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -125,6 +129,21 @@ export function FilterContent({
     <div className="space-y-4">
       <div>
         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          Buscar por nome
+        </h4>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+          <Input
+            value={nameFilter}
+            onChange={(e) => onNameFilterChange(e.target.value)}
+            placeholder="Nome do ponto..."
+            className="pl-8 h-8 text-sm"
+          />
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
           Tipo de ponto
         </h4>
         <div className="flex flex-col gap-1">
@@ -157,6 +176,27 @@ export function FilterContent({
               );
             },
           )}
+          <button
+            onClick={onToggleBlockedStreets}
+            className="flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors text-left"
+          >
+            <span className="flex items-center gap-2">
+              <Construction
+                className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`}
+              />
+              Ruas fechadas
+              <Badge variant="outline" className="h-5 px-1.5 text-xs">
+                {blockedStreetsCount}
+              </Badge>
+            </span>
+            <span
+              className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`}
+              />
+            </span>
+          </button>
         </div>
       </div>
 
@@ -222,28 +262,7 @@ export function FilterContent({
         </div>
       </div>
 
-      <div className="pt-2 border-t space-y-2">
-        <button
-          onClick={onToggleBlockedStreets}
-          className="w-full flex items-center justify-between gap-2 rounded-lg border px-3 py-1.5 text-sm hover:bg-accent transition-colors"
-        >
-          <span className="flex items-center gap-2">
-            <Construction
-              className={`size-4 shrink-0 ${showBlockedStreets ? "text-red-500" : "text-muted-foreground"}`}
-            />
-            Ruas fechadas
-            <Badge variant="outline" className="h-5 px-1.5 text-xs">
-              {blockedStreetsCount}
-            </Badge>
-          </span>
-          <span
-            className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${showBlockedStreets ? "bg-red-500" : "bg-muted"}`}
-          >
-            <span
-              className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${showBlockedStreets ? "translate-x-4" : "translate-x-0"}`}
-            />
-          </span>
-        </button>
+      <div className="pt-2 border-t">
         <div className="flex items-center">
           <span className="text-sm text-muted-foreground">
             {filteredCount} de {totalCount} pontos
